@@ -34,7 +34,7 @@ async function checkSession() {
     try {
         const { data: { session }, error } = await supabaseClient.auth.getSession();
         if (session) {
-            handlePostLogin(session.user.user_metadata?.first_name || session.user.email.split('@')[0], session.user.email);
+            handlePostLogin(session.user.user_metadata?.first_name || session.user.email.split('@')[0], session.user.email, session.user.id);
         } else {
             showAuth();
         }
@@ -57,9 +57,10 @@ function trackUserGlobally(email, name) {
     localStorage.setItem('all_auth_users', JSON.stringify(users));
 }
 
-function handlePostLogin(userName, userEmail) {
+function handlePostLogin(userName, userEmail, userId) {
     if (userEmail) {
         localStorage.setItem('currentUserEmail', userEmail);
+        if (userId) localStorage.setItem('currentUserId', userId);
         trackUserGlobally(userEmail, userName);
     }
     const pendingPlan = localStorage.getItem('pending_plan');
@@ -99,10 +100,27 @@ function showDashboard(userName) {
     renderProjects();
 }
 
-function renderProjects() {
+async function renderProjects() {
     const email = localStorage.getItem('currentUserEmail') || 'guest';
-    const projects = JSON.parse(localStorage.getItem(`projects_${email}`) || '[]');
+    const userId = localStorage.getItem('currentUserId');
     const mainArea = document.querySelector('.dash-main-area');
+    let projects = [];
+
+    if (isMockMode || !userId) {
+        projects = JSON.parse(localStorage.getItem(`projects_${email}`) || '[]');
+    } else {
+        const { data, error } = await supabaseClient
+            .from('projects')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+            
+        if (!error && data) {
+            projects = data;
+        } else if (error) {
+            console.error("Error fetching projects:", error);
+        }
+    }
     
     if (projects.length === 0) {
         document.getElementById('empty-state').style.display = 'block';
@@ -136,25 +154,37 @@ function renderProjects() {
     }
 }
 
-function finalizePayment() {
-    const planId = localStorage.getItem('pending_plan');
+async function finalizePayment() {
+    const planId = localStorage.getItem('pending_plan') || 'standard';
     const projectName = localStorage.getItem('pending_project_name') || 'New Project';
     const mockUser = JSON.parse(localStorage.getItem('mockUser') || '{"name": "User", "email": "guest"}');
     const email = localStorage.getItem('currentUserEmail') || mockUser.email;
+    const userId = localStorage.getItem('currentUserId');
     
-    // Simulate payment success
-    const newProject = {
-        id: Date.now(),
-        name: projectName,
-        plan: planId || 'standard',
-        status: 'active',
-        created_at: new Date().toISOString()
-    };
-    
-    const projectKey = `projects_${email}`;
-    const projects = JSON.parse(localStorage.getItem(projectKey) || '[]');
-    projects.push(newProject);
-    localStorage.setItem(projectKey, JSON.stringify(projects));
+    if (isMockMode || !userId) {
+        // Simulate payment success using local storage map
+        const newProject = {
+            id: Date.now(),
+            name: projectName,
+            plan: planId,
+            status: 'active',
+            created_at: new Date().toISOString()
+        };
+        const projectKey = `projects_${email}`;
+        const projects = JSON.parse(localStorage.getItem(projectKey) || '[]');
+        projects.push(newProject);
+        localStorage.setItem(projectKey, JSON.stringify(projects));
+    } else {
+        // Real DB Insert
+        const { error } = await supabaseClient.from('projects').insert([{
+            user_id: userId,
+            user_email: email,
+            name: projectName,
+            plan: planId,
+            status: 'active'
+        }]);
+        if (error) console.error("Error inserting project:", error);
+    }
     
     localStorage.removeItem('pending_plan');
     localStorage.removeItem('pending_project_name');
@@ -225,9 +255,13 @@ async function handleLogin(e) {
     });
 
     if (error) {
-        errorEl.innerText = error.message;
+        if (error.message.toLowerCase().includes('email not confirmed')) {
+            errorEl.innerText = 'Please check your email to verify your account before logging in.';
+        } else {
+            errorEl.innerText = error.message;
+        }
     } else {
-        handlePostLogin(data.user.user_metadata?.first_name || data.user.email.split('@')[0], data.user.email);
+        handlePostLogin(data.user.user_metadata?.first_name || data.user.email.split('@')[0], data.user.email, data.user.id);
     }
 }
 
@@ -269,7 +303,21 @@ async function handleSignup(e) {
     if (error) {
         errorEl.innerText = error.message;
     } else {
-        handlePostLogin(name + ' ' + surname, email);
+        if (data.session) {
+            // Email confirmation is disabled on Supabase
+            handlePostLogin(name + ' ' + surname, email, data.user.id);
+        } else {
+            // Email confirmation is required
+            document.getElementById('signup-form').innerHTML = `
+                <div style="text-align: center; padding: 40px 0;">
+                    <i data-lucide="mail-check" style="width: 48px; height: 48px; color: #22c55e; margin-bottom: 16px;"></i>
+                    <h3 style="margin-bottom: 8px;">Check Your Email</h3>
+                    <p style="color: #6b7280; margin-bottom: 24px; font-size: 15px; line-height: 1.5;">We've sent a verification link to <strong>${email}</strong>.<br>Please click the link to activate your account and log in.</p>
+                    <button class="btn-primary" onclick="switchAuthMode('login')" style="width: 100%; justify-content: center;">Go to Login</button>
+                </div>
+            `;
+            lucide.createIcons();
+        }
     }
 }
 
@@ -350,25 +398,58 @@ function switchDashboardTab(tabName) {
     if(sectionEl) sectionEl.style.display = 'block';
 }
 
-function loadProjectDetailData(projectId) {
-    const dataKey = `project_data_${projectId}`;
-    const data = JSON.parse(localStorage.getItem(dataKey) || '{}');
+async function loadProjectDetailData(projectId) {
+    let data = {};
+    const userId = localStorage.getItem('currentUserId');
+    
+    if (isMockMode || !userId) {
+        const dataKey = `project_data_${projectId}`;
+        data = JSON.parse(localStorage.getItem(dataKey) || '{}');
+    } else {
+        const { data: rowData, error } = await supabaseClient
+            .from('projects')
+            .select('overview, prompts, sources, models, comply')
+            .eq('id', projectId)
+            .single();
+            
+        if (!error && rowData) {
+            data = {
+                overview: rowData.overview || {},
+                prompts: rowData.prompts || {},
+                sources: rowData.sources || {},
+                models: rowData.models || {},
+                comply: rowData.comply || {}
+            };
+        }
+    }
+
+    // Default resets
+    document.getElementById('overview-msg-display').innerText = 'No recent updates.';
+    document.getElementById('overview-time-display').innerText = '';
+    document.querySelector('#overview-update-box .status-light').className = 'status-light';
+    
+    document.getElementById('prompts-title-display').innerText = 'No Prompts Documentation';
+    document.getElementById('prompts-desc-display').innerText = 'Code documentation for the website will appear here.';
+    document.getElementById('prompts-files-display').innerHTML = '';
+    
+    document.getElementById('sources-content-display').innerText = 'No sources documentation provided yet.';
+    document.getElementById('models-content-display').innerText = 'Complete project documentation will appear here when updated.';
+    document.getElementById('comply-content-display').innerText = 'Awaiting compliance review from the Nuclear AI team.';
 
     // Overview
     if (data.overview && data.overview.msg) {
         document.getElementById('overview-msg-display').innerText = data.overview.msg;
-        document.getElementById('overview-time-display').innerText = new Date(data.overview.timestamp).toLocaleString();
+        if(data.overview.timestamp) document.getElementById('overview-time-display').innerText = new Date(data.overview.timestamp).toLocaleString();
         const light = document.querySelector('#overview-update-box .status-light');
-        light.className = `status-light ${data.overview.color}`;
+        light.className = `status-light ${data.overview.color || 'green'}`;
     }
 
     // Prompts
     if (data.prompts && data.prompts.title) {
         document.getElementById('prompts-title-display').innerText = data.prompts.title;
-        document.getElementById('prompts-desc-display').innerText = data.prompts.desc;
+        document.getElementById('prompts-desc-display').innerText = data.prompts.desc || '';
         
         const filesContainer = document.getElementById('prompts-files-display');
-        filesContainer.innerHTML = '';
         if (data.prompts.files && data.prompts.files.length > 0) {
             data.prompts.files.forEach(f => {
                 const fdiv = document.createElement('div');
