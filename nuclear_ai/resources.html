@@ -21,59 +21,92 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 40px;
-            margin: 60px auto;
-            max-width: 1000px;
-            height: 200px;
+            margin: 80px auto;
+            max-width: 900px;
+            height: 500px;
             position: relative;
+        }
+
+        .ai-nodes-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .ai-node {
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             background: white;
             border: 1px solid #e5e7eb;
-            border-radius: 20px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            position: relative;
-            animation: float 4s ease-in-out infinite;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            position: absolute;
+            z-index: 2;
+            transition: all 0.3s ease;
         }
 
-        .ai-node svg { width: 40px; height: 40px; }
-        .ai-node.openai { animation-delay: 0s; }
-        .ai-node.claude { animation-delay: 0.5s; }
-        .ai-node.gemini { animation-delay: 1s; }
-        .ai-node.llama { animation-delay: 1.5s; }
-        .ai-node.perplexity { animation-delay: 2s; }
+        .ai-node.openai { transform: translate(0, -180px); }
+        .ai-node.claude { transform: translate(180px, -60px); }
+        .ai-node.gemini { transform: translate(120px, 140px); }
+        .ai-node.llama { transform: translate(-120px, 140px); }
+        .ai-node.perplexity { transform: translate(-180px, -60px); }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
+        .ai-node svg { width: 32px; height: 32px; }
+
+        .ai-wires-svg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            pointer-events: none;
         }
 
         .chat-bubble {
             position: absolute;
             background: #111827;
             color: #fff;
-            padding: 8px 16px;
-            border-radius: 12px;
-            font-size: 12px;
+            padding: 10px 18px;
+            border-radius: 14px;
+            font-size: 13px;
             font-weight: 500;
             white-space: nowrap;
             opacity: 0;
-            animation: talk 10s linear infinite;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transform: translateY(0);
+            z-index: 10;
         }
 
-        @keyframes talk {
-            0%, 10%, 90%, 100% { opacity: 0; transform: translateY(0); }
-            15%, 25% { opacity: 1; transform: translateY(-50px); } /* OpenAI talks */
-            30%, 40% { opacity: 0; }
-            45%, 55% { opacity: 1; transform: translateY(-50px); } /* Gemini answers */
-            60%, 70% { opacity: 0; }
+        .chat-bubble i { width: 14px; height: 14px; color: #00f0ff; }
+
+        /* Animation Loop */
+        @keyframes sequenceTalk {
+            0%, 15% { opacity: 0; transform: translateY(0); }
+            20%, 35% { opacity: 1; transform: translateY(-60px); }
+            40%, 100% { opacity: 0; transform: translateY(0); }
         }
+
+        .bubble-1 { animation: sequenceTalk 15s linear infinite; animation-delay: 0s; }
+        .bubble-2 { animation: sequenceTalk 15s linear infinite; animation-delay: 3s; }
+        .bubble-3 { animation: sequenceTalk 15s linear infinite; animation-delay: 6s; }
+        .bubble-4 { animation: sequenceTalk 15s linear infinite; animation-delay: 9s; }
+        .bubble-5 { animation: sequenceTalk 15s linear infinite; animation-delay: 12s; }
+
+        .openai .chat-bubble { transform: translate(0, -60px); }
+        .claude .chat-bubble { transform: translate(100px, -60px); }
+        .gemini .chat-bubble { transform: translate(100px, 20px); }
+        .llama .chat-bubble { transform: translate(-100px, 20px); }
+        .perplexity .chat-bubble { transform: translate(-100px, -60px); }
 
         .brain-viz-section {
             padding: 100px 20px;
@@ -158,27 +191,46 @@
         </p>
 
         <div class="ai-chat-animation">
-            <!-- OpenAI -->
-            <div class="ai-node openai">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M4.93 19.07L19.07 4.93"/></svg>
-                <div class="chat-bubble" style="animation-delay: 0s;">Analyzing user intent...</div>
-            </div>
-            <!-- Claude -->
-            <div class="ai-node claude">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9 9 9 0 0 0-9-9z"/><path d="M12 8v8M8 12h8"/></svg>
-            </div>
-            <!-- Gemini -->
-            <div class="ai-node gemini">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
-                <div class="chat-bubble" style="animation: talk 10s linear infinite; animation-delay: 4s;">Synthesizing market trends.</div>
-            </div>
-            <!-- Llama -->
-            <div class="ai-node llama">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M19 8a4 4 0 0 0-2-3.87"/></svg>
-            </div>
-            <!-- Perplexity -->
-            <div class="ai-node perplexity">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <svg class="ai-wires-svg" viewBox="0 0 900 500">
+                <!-- Wires connecting nodes in a pentagon/circle -->
+                <line x1="450" y1="70" x2="630" y2="190" stroke="#e5e7eb" stroke-width="1.5" stroke-dasharray="5,5" />
+                <line x1="630" y1="190" x2="570" y2="390" stroke="#e5e7eb" stroke-width="1.5" stroke-dasharray="5,5" />
+                <line x1="570" y1="390" x2="330" y2="390" stroke="#e5e7eb" stroke-width="1.5" stroke-dasharray="5,5" />
+                <line x1="330" y1="390" x2="270" y2="190" stroke="#e5e7eb" stroke-width="1.5" stroke-dasharray="5,5" />
+                <line x1="270" y1="190" x2="450" y2="70" stroke="#e5e7eb" stroke-width="1.5" stroke-dasharray="5,5" />
+                
+                <!-- Cross connections -->
+                <line x1="450" y1="70" x2="570" y2="390" stroke="#f3f4f6" stroke-width="1" />
+                <line x1="450" y1="70" x2="330" y2="390" stroke="#f3f4f6" stroke-width="1" />
+                <line x1="630" y1="190" x2="270" y2="190" stroke="#f3f4f6" stroke-width="1" />
+            </svg>
+
+            <div class="ai-nodes-container">
+                <!-- OpenAI -->
+                <div class="ai-node openai">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M4.93 19.07L19.07 4.93"/></svg>
+                    <div class="chat-bubble bubble-1"><i data-lucide="zap"></i> Analyzing user intent...</div>
+                </div>
+                <!-- Claude -->
+                <div class="ai-node claude">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9 9 9 0 0 0-9-9z"/><path d="M12 8v8M8 12h8"/></svg>
+                    <div class="chat-bubble bubble-2"><i data-lucide="users"></i> Requesting human insights...</div>
+                </div>
+                <!-- Gemini -->
+                <div class="ai-node gemini">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                    <div class="chat-bubble bubble-3"><i data-lucide="trending-up"></i> Synthesizing market trends...</div>
+                </div>
+                <!-- Llama -->
+                <div class="ai-node llama">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M19 8a4 4 0 0 0-2-3.87"/></svg>
+                    <div class="chat-bubble bubble-4"><i data-lucide="search"></i> Competitor look up...</div>
+                </div>
+                <!-- Perplexity -->
+                <div class="ai-node perplexity">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <div class="chat-bubble bubble-5"><i data-lucide="download"></i> Fetching new resources...</div>
+                </div>
             </div>
         </div>
     </section>
