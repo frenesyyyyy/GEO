@@ -88,6 +88,31 @@
         </div>
     </div>
 
+    <!-- Payment View -->
+    <div id="payment-view" class="payment-section" style="display: none;">
+        <div class="payment-card">
+            <div class="auth-header">
+                <div class="badge" style="margin-bottom: 16px;">Final Step</div>
+                <h2>Complete Your Subscription</h2>
+                <p>You're almost there! Finalize your plan to activate your first project.</p>
+            </div>
+
+            <div class="plan-details">
+                <div class="plan-info">
+                    <h4 id="payment-plan-name">GEO/SEO Plus</h4>
+                    <p>Nuclear AI Strategic Package</p>
+                </div>
+                <div id="payment-plan-price" class="plan-price">$150/mo</div>
+            </div>
+
+            <button onclick="finalizePayment()" class="btn-submit" style="background: #111827;">
+                <i data-lucide="credit-card" style="width: 18px; margin-right: 8px; vertical-align: middle;"></i> 
+                Continue to Stripe Checkout
+            </button>
+            <p style="margin-top: 24px; font-size: 13px; color: #6b7280;">Secure credit card payment handled by Stripe.</p>
+        </div>
+    </div>
+
     <!-- Main Dashboard View -->
     <div id="dashboard-view" class="dashboard-layout" style="display: none;">
         <!-- Left Sidebar -->
@@ -101,6 +126,10 @@
                 <i data-lucide="search"></i>
                 <input type="text" placeholder="Quick Actions">
             </div>
+
+            <button class="btn-primary" style="width: 100%; margin-bottom: 24px; justify-content: center; background: #111827; border-radius: 10px;" onclick="openPlanModal()">
+                <i data-lucide="plus" style="width: 18px;"></i> New Project
+            </button>
 
             <div class="sidebar-nav">
                 <div class="nav-group">Pages</div>
@@ -133,15 +162,51 @@
 
             <!-- Content Area -->
             <div class="dash-main-area">
+                <!-- Projects List (Initially hidden) -->
+                <div id="projects-list" style="display: none;"></div>
+
                 <!-- Empty State -->
-                <div class="empty-state">
+                <div id="empty-state" class="empty-state">
                     <div class="empty-icon"><i data-lucide="folder-search"></i></div>
                     <h3>No Projects Started Yet</h3>
                     <p>Connect your first data source or set up a prompt to begin tracking your Nuclear AI visibility and positioning metrics.</p>
-                    <button class="btn-primary" onclick="alert('Feature coming soon!')"><i data-lucide="plus"></i> Create Project</button>
+                    <button class="btn-primary" onclick="openPlanModal()"><i data-lucide="plus"></i> Create Project</button>
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Plan Selection Modal -->
+    <div id="plan-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Select a Plan for your Project</h2>
+                <button class="close-modal" onclick="closePlanModal()">&times;</button>
+            </div>
+            <div class="plan-options">
+                <div class="plan-option" onclick="handleModalSelect('standard')">
+                    <div class="plan-info">
+                        <h4>Standard</h4>
+                        <p>Essential GEO & SEO Tools</p>
+                    </div>
+                    <strong>$50/mo</strong>
+                </div>
+                <div class="plan-option featured" onclick="handleModalSelect('plus')">
+                    <div class="plan-info">
+                        <h4>Plus & Support</h4>
+                        <p>Advanced Strategies & Consulting</p>
+                    </div>
+                    <strong>$150/mo</strong>
+                </div>
+                <div class="plan-option" onclick="handleModalSelect('mvp')">
+                    <div class="plan-info">
+                        <h4>MVP SaaS Delivery</h4>
+                        <p>Full Product Build & Audit</p>
+                    </div>
+                    <strong>Custom</strong>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="auth.js"></script>

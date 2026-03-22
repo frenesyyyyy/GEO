@@ -24,7 +24,7 @@ async function checkSession() {
     if (isMockMode) {
         let mockUser = localStorage.getItem('mockUser');
         if (mockUser) {
-            showDashboard(JSON.parse(mockUser).name);
+            handlePostLogin(JSON.parse(mockUser).name);
         } else {
             showAuth();
         }
@@ -34,25 +34,108 @@ async function checkSession() {
     try {
         const { data: { session }, error } = await supabaseClient.auth.getSession();
         if (session) {
-            showDashboard(session.user.user_metadata?.first_name || session.user.email.split('@')[0]);
+            handlePostLogin(session.user.user_metadata?.first_name || session.user.email.split('@')[0]);
         } else {
             showAuth();
         }
-    } catch (err) {
+    } catch(err) {
         console.error("Supabase Error:", err);
         showAuth();
+    }
+}
+
+function handlePostLogin(userName) {
+    const pendingPlan = localStorage.getItem('pending_plan');
+    if (pendingPlan) {
+        showPayment(userName, pendingPlan);
+    } else {
+        showDashboard(userName);
     }
 }
 
 function showAuth() {
     document.getElementById('auth-view').style.display = 'flex';
     document.getElementById('dashboard-view').style.display = 'none';
+    document.getElementById('payment-view').style.display = 'none';
+}
+
+function showPayment(userName, planId) {
+    document.getElementById('auth-view').style.display = 'none';
+    document.getElementById('dashboard-view').style.display = 'none';
+    document.getElementById('payment-view').style.display = 'flex';
+    
+    // Update payment UI
+    const planNames = { 'standard': 'GEO/SEO Standard', 'plus': 'GEO/SEO Plus & Support', 'mvp': 'MVP SaaS Product' };
+    const planPrices = { 'standard': '$50/mo', 'plus': '$150/mo', 'mvp': '$300-$5k' };
+    
+    document.getElementById('payment-plan-name').innerText = planNames[planId] || 'Selected Plan';
+    document.getElementById('payment-plan-price').innerText = planPrices[planId] || '';
 }
 
 function showDashboard(userName) {
+    document.body.classList.add('dashboard-active');
     document.getElementById('auth-view').style.display = 'none';
+    document.getElementById('payment-view').style.display = 'none';
     document.getElementById('dashboard-view').style.display = 'flex';
     document.getElementById('user-display-name').innerText = userName || 'User';
+    
+    renderProjects();
+}
+
+function renderProjects() {
+    const projects = JSON.parse(localStorage.getItem('user_projects') || '[]');
+    const mainArea = document.querySelector('.dash-main-area');
+    
+    if (projects.length === 0) {
+        document.getElementById('empty-state').style.display = 'block';
+        document.getElementById('projects-list').style.display = 'none';
+    } else {
+        document.getElementById('empty-state').style.display = 'none';
+        document.getElementById('projects-list').style.display = 'grid';
+        
+        const listContainer = document.getElementById('projects-list');
+        listContainer.innerHTML = '';
+        projects.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'project-card';
+            card.innerHTML = `
+                <div class="project-info">
+                    <div class="project-icon"><i data-lucide="layout"></i></div>
+                    <div>
+                        <h4>${p.name}</h4>
+                        <span class="project-tag ${p.status}">${p.status}</span>
+                    </div>
+                </div>
+                <div class="project-meta">
+                    <span>Plan: ${p.plan}</span>
+                    <span>Created: ${new Date(p.created_at).toLocaleDateString()}</span>
+                </div>
+            `;
+            listContainer.appendChild(card);
+        });
+        lucide.createIcons();
+    }
+}
+
+function finalizePayment() {
+    const planId = localStorage.getItem('pending_plan');
+    const mockUser = JSON.parse(localStorage.getItem('mockUser') || '{"name": "User"}');
+    
+    // Simulate payment success
+    const newProject = {
+        id: Date.now(),
+        name: 'New Project ' + (JSON.parse(localStorage.getItem('user_projects') || '[]').length + 1),
+        plan: planId || 'standard',
+        status: 'active',
+        created_at: new Date().toISOString()
+    };
+    
+    const projects = JSON.parse(localStorage.getItem('user_projects') || '[]');
+    projects.push(newProject);
+    localStorage.setItem('user_projects', JSON.stringify(projects));
+    localStorage.removeItem('pending_plan');
+    
+    showDashboard(mockUser.name);
 }
 
 function switchAuthMode(mode) {
@@ -108,7 +191,7 @@ async function handleLogin(e) {
         let name = email.split('@')[0];
         name = name.charAt(0).toUpperCase() + name.slice(1);
         localStorage.setItem('mockUser', JSON.stringify({ email: email, name: name }));
-        showDashboard(name);
+        handlePostLogin(name);
         return;
     }
 
@@ -120,7 +203,7 @@ async function handleLogin(e) {
     if (error) {
         errorEl.innerText = error.message;
     } else {
-        showDashboard(data.user.user_metadata?.first_name || data.user.email.split('@')[0]);
+        handlePostLogin(data.user.user_metadata?.first_name || data.user.email.split('@')[0]);
     }
 }
 
@@ -142,7 +225,7 @@ async function handleSignup(e) {
         // Mock signup success
         let fullName = name + ' ' + surname;
         localStorage.setItem('mockUser', JSON.stringify({ email: email, name: fullName }));
-        showDashboard(fullName);
+        handlePostLogin(fullName);
         return;
     }
 
@@ -162,7 +245,7 @@ async function handleSignup(e) {
     if (error) {
         errorEl.innerText = error.message;
     } else {
-        showDashboard(name + ' ' + surname);
+        handlePostLogin(name + ' ' + surname);
     }
 }
 
@@ -177,4 +260,20 @@ async function handleLogout() {
     await supabaseClient.auth.signOut();
     showAuth();
     switchAuthMode('login');
+}
+
+// Modal Management
+function openPlanModal() {
+    document.getElementById('plan-modal').style.display = 'flex';
+}
+
+function closePlanModal() {
+    document.getElementById('plan-modal').style.display = 'none';
+}
+
+function handleModalSelect(planId) {
+    localStorage.setItem('pending_plan', planId);
+    closePlanModal();
+    const mockUser = JSON.parse(localStorage.getItem('mockUser') || '{"name": "User"}');
+    showPayment(mockUser.name, planId);
 }

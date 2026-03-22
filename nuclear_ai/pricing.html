@@ -53,7 +53,7 @@
                     <li><i data-lucide="check-circle-2"></i> Code suggestions</li>
                     <li><i data-lucide="check-circle-2"></i> Monthly meeting</li>
                 </ul>
-                <button class="btn-pricing secondary">Get Started</button>
+                <button class="pricing-btn" onclick="selectPlan('standard')">Get Started</button>
             </div>
 
             <!-- Plus Plan (Featured) -->
@@ -71,7 +71,7 @@
                     <li><i data-lucide="check-circle-2"></i> External web management</li>
                     <li><i data-lucide="check-circle-2"></i> Weekly consultations</li>
                 </ul>
-                <button class="btn-pricing primary">Choose Plus</button>
+                <button class="pricing-btn" onclick="selectPlan('plus')">Choose Plus</button>
             </div>
 
             <!-- MVP Plan -->
@@ -86,7 +86,7 @@
                     <li><i data-lucide="check-circle-2"></i> Deployment & Launch support</li>
                     <li><i data-lucide="check-circle-2"></i> Strategic consultation</li>
                 </ul>
-                <button class="btn-pricing secondary">Request MVP</button>
+                <button class="pricing-btn" onclick="selectPlan('mvp')">Buy MVP</button>
             </div>
         </div>
 
@@ -111,6 +111,13 @@
 
     <script>
         lucide.createIcons();
+
+        function selectPlan(id) {
+            // Save plan ID to localStorage for post-auth retrieval
+            localStorage.setItem('pending_plan', id);
+            // Redirect to dashboard with signup mode
+            window.location.href = 'dashboard.html?mode=signup';
+        }
     </script>
 </body>
 
