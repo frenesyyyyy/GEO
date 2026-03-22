@@ -356,38 +356,75 @@ let currentOpenProject = null;
 
 function openProjectDetail(project) {
     currentOpenProject = project;
+    const detailArea = document.getElementById('project-detail-area');
     
     document.getElementById('empty-state').style.display = 'none';
     document.getElementById('projects-list').style.display = 'none';
-    document.getElementById('project-detail-area').style.display = 'block';
+    detailArea.style.display = 'block';
+    detailArea.dataset.active = 'true';
     
     document.getElementById('detail-project-name').innerText = project.name;
-    document.getElementById('detail-project-plan').innerText = project.plan;
+    document.getElementById('detail-project-plan').innerText = project.plan.toUpperCase() + ' PLAN';
     
+    // Enable other sidebar tabs and hide selection hint
+    document.querySelectorAll('.sidebar-nav li').forEach(li => li.classList.remove('disabled'));
+    const hint = document.getElementById('nav-selection-hint');
+    if (hint) hint.style.display = 'none';
+
     loadProjectDetailData(project.id);
     switchDashboardTab('overview');
 }
 
 function closeProjectDetail() {
     currentOpenProject = null;
-    document.getElementById('project-detail-area').style.display = 'none';
-    renderProjects();
+    const detailArea = document.getElementById('project-detail-area');
+    detailArea.style.display = 'none';
+    detailArea.dataset.active = 'false';
+    
+    // Disable other sidebar tabs and show selection hint
+    document.querySelectorAll('.sidebar-nav li').forEach(li => {
+        if (li.id !== 'nav-overview') li.classList.add('disabled');
+    });
+    const hint = document.getElementById('nav-selection-hint');
+    if (hint) hint.style.display = 'block';
+
+    switchDashboardTab('overview');
 }
 
-function switchDashboardTab(tabName) {
-    if (!currentOpenProject) return;
+function switchDashboardTab(tabId) {
+    const targetNav = document.getElementById(`nav-${tabId}`);
+    if(targetNav && targetNav.classList.contains('disabled')) return;
 
-    // Update active nav link
-    document.querySelectorAll('.sidebar-nav li').forEach(el => el.classList.remove('active'));
-    const navEl = document.getElementById('nav-' + tabName);
-    if(navEl) navEl.classList.add('active');
+    // Update nav UI
+    const navItems = document.querySelectorAll('.sidebar-nav li');
+    navItems.forEach(item => item.classList.remove('active'));
+    if(targetNav) targetNav.classList.add('active');
 
-    // Show correct section
-    const sections = document.querySelectorAll('.detail-content-section');
-    sections.forEach(s => s.style.display = 'none');
-    
-    const sectionEl = document.getElementById('detail-' + tabName);
-    if(sectionEl) sectionEl.style.display = 'block';
+    // Hide ALL possible content sections first
+    const sections = [
+        'projects-list', 'empty-state', 'project-detail-area',
+        'detail-overview', 'detail-prompts', 'detail-sources', 'detail-models', 'detail-settings', 'detail-comply'
+    ];
+    sections.forEach(s => {
+        const el = document.getElementById(s);
+        if(el) el.style.display = 'none';
+    });
+
+    if (tabId === 'overview') {
+        const isDetail = document.getElementById('project-detail-area').dataset.active === 'true';
+        if (isDetail) {
+            document.getElementById('project-detail-area').style.display = 'block';
+            document.getElementById('detail-overview').style.display = 'block';
+        } else {
+            // Re-render project list to show either list or empty state
+            renderProjects();
+        }
+    } else {
+        // Show specific detail tab
+        document.getElementById('project-detail-area').style.display = 'block';
+        const sectionEl = document.getElementById(`detail-${tabId}`);
+        if(sectionEl) sectionEl.style.display = 'block';
+    }
 }
 
 async function loadProjectDetailData(projectId) {

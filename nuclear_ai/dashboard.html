@@ -129,12 +129,16 @@
             <div class="sidebar-nav">
                 <div class="nav-group">Pages</div>
                 <ul>
-                    <li class="active" id="nav-overview" onclick="switchDashboardTab('overview')"><a href="#"><i data-lucide="home"></i> Overview</a></li>
-                    <li id="nav-prompts" onclick="switchDashboardTab('prompts')"><a href="#"><i data-lucide="terminal-square"></i> Prompts</a></li>
-                    <li id="nav-sources" onclick="switchDashboardTab('sources')"><a href="#"><i data-lucide="database"></i> Sources</a></li>
-                    <li id="nav-models" onclick="switchDashboardTab('models')"><a href="#"><i data-lucide="box"></i> Models</a></li>
-                    <li id="nav-settings" onclick="switchDashboardTab('settings')"><a href="#"><i data-lucide="settings"></i> Settings</a></li>
-                    <li id="nav-comply" onclick="switchDashboardTab('comply')"><a href="#"><i data-lucide="shield-check"></i> Comply</a></li>
+                    <li class="active" id="nav-overview" onclick="switchDashboardTab('overview')">
+                        <a href="#">
+                            <i data-lucide="home"></i> 
+                            Overview <span id="nav-selection-hint" style="font-size: 10px; color: #9ca3af; display: block; font-weight: 400;">(Select a Project)</span>
+                        </a>
+                    </li>
+                    <li class="disabled" id="nav-prompts" onclick="switchDashboardTab('prompts')"><a href="#"><i data-lucide="terminal-square"></i> Prompts</a></li>
+                    <li class="disabled" id="nav-sources" onclick="switchDashboardTab('sources')"><a href="#"><i data-lucide="database"></i> Sources</a></li>
+                    <li class="disabled" id="nav-models" onclick="switchDashboardTab('models')"><a href="#"><i data-lucide="box"></i> Models</a></li>
+                    <li class="disabled" id="nav-comply" onclick="switchDashboardTab('comply')"><a href="#"><i data-lucide="shield-check"></i> Comply</a></li>
                 </ul>
             </div>
             
