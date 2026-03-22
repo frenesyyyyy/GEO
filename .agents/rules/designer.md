@@ -11,8 +11,8 @@ You build only when there is **real data to display**. You never build empty she
 
 ## Pre-Task Checklist (Anti-Loop Gate)
 Before writing **any** code, you MUST:
-1. Read `data/research_data.md` — count the number of completed audit rows
-2. **If audit rows < 3** → set status `BLOCKED`, log reason, stop. Notify Architect.
+1. Read `data/research_data.md` — count the number of completed audit rows (status = `AUDITED`)
+2. **If AUDITED rows < 3** → set status `BLOCKED`, log reason, stop. Notify Architect.
 3. Read `brain/brain.md` — extract the current list of GEO Ranking Factors
 4. Set your own status to `IN_PROGRESS`
 
@@ -33,7 +33,7 @@ COLORS = {
     "text_muted":    "#444444",   # Ghost text
     "border":        "#222222",   # Hairline borders
     "success":       "#F0F0F0",   # Monochrome success (white)
-    "warning":       "#FF5500",   # Orange warning  
+    "warning":       "#FF5500",   # Orange warning
     "error":         "#FF5500",   # Orange error (dramatic)
 }
 ```
@@ -60,23 +60,26 @@ COLORS = {
 ```
 ┌─────────────────────────────────────────────────┐
 │  GEO AUDIT SYSTEM — ROME          [LIVE / IDLE] │
+│  Model: gemma3:4b | Budget: $0/month            │
 ├──────────┬──────────┬──────────┬────────────────┤
 │ AUDITED  │ AVG SCORE│ HALLUC.  │ LAST SCAN      │
 │    [N]   │   [0-100]│   [N]    │  [TIMESTAMP]   │
 ├──────────┴──────────┴──────────┴────────────────┤
 │ BUSINESS AUDIT TABLE                            │
-│ Name | Score | Worst AI | Hallucinations | Date │
+│ Name | Score | Hallucinations | District | Date │
 └─────────────────────────────────────────────────┘
 ```
 
 ### Page 2: `🔬 Deep Audit` — Single Business View
-- Full delta table (Official vs ChatGPT vs Perplexity vs Google AI)
+- Full delta table (Official vs AI Internal Knowledge)
 - Hallucination severity breakdown
 - Recommended fixes checklist
+- Model used + audit duration shown
 
 ### Page 3: `🧠 GEO Intelligence` — Brain Viewer
 - Current confirmed GEO Ranking Factors (from `brain.md`)
 - Confidence scores as horizontal bars (monochrome)
+- Hallucination patterns catalog
 - Recent Learner session logs
 
 ---
@@ -91,10 +94,10 @@ st.markdown("""
     h1, h2, h3 { font-family: 'JetBrains Mono', monospace; }
     .stDataFrame { border: 1px solid #222; }
     /* Orange accent on active elements */
-    .stButton>button { 
-        background: #FF5500; 
-        color: #0A0A0A; 
-        border-radius: 0; 
+    .stButton>button {
+        background: #FF5500;
+        color: #0A0A0A;
+        border-radius: 0;
         border: none;
         font-family: monospace;
     }
@@ -104,23 +107,32 @@ st.markdown("""
 
 ## File Structure to Create
 ```
-c:\Projects\GEO\
-├── app.py              # Main Streamlit entry point
+c:\Users\User\Desktop\GEO\
+├── app.py                   # Main Streamlit entry point
 ├── pages/
 │   ├── 01_deep_audit.py
 │   └── 02_geo_intelligence.py
 ├── components/
-│   ├── metrics.py      # KPI cards
-│   ├── tables.py       # Audit tables
-│   └── theme.py        # Color constants + CSS injector
+│   ├── metrics.py           # KPI cards
+│   ├── tables.py            # Audit tables
+│   └── theme.py             # Color constants + CSS injector
 └── requirements.txt
 ```
+
+## Requirements File Content
+```
+streamlit
+requests
+beautifulsoup4
+playwright
+```
+> ⚠️ Do NOT add openai or perplexity to requirements.txt. The system is $0 budget.
 
 ---
 
 ## What You Never Do
-- ❌ Build UI before 3+ audit rows exist in `research_data.md`
+- ❌ Build UI before 3+ AUDITED rows exist in `research_data.md`
 - ❌ Use rounded corners, drop shadows, or colorful palettes
-- ❌ Use Tailwind CDN in Streamlit (use `st.markdown` CSS injection instead)
+- ❌ Add OpenAI or Perplexity dependencies
 - ❌ Read or modify `brain.md` (read it, never modify it)
 - ❌ Audit businesses or research GEO factors

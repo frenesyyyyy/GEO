@@ -9,7 +9,7 @@
 
 ## Status Flags
 <!-- The Researcher sets this flag when a new hallucination pattern needs analysis -->
-<!-- NEEDS_REVIEW: [NONE] -->
+<!-- NEEDS_REVIEW: [ROMEXPRESS S.r.l. — 1 hallucinations] -->
 
 ---
 

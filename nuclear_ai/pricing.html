@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing | Nuclear AI</title>
+    <link rel="stylesheet" href="style.css?v=11">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">
+            <a href="index.html" style="display: flex; align-items: center; gap: 10px;">
+                <img src="NuclearAI.png" alt="Nuclear AI" class="logo-img">
+                Nuclear AI
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="pricing.html">Pricing</a></li>
+                <li><a href="#">Resources</a></li>
+                <li><a href="mystartup.html">My StartUp</a></li>
+            </ul>
+        </nav>
+        <div class="auth-buttons">
+            <button class="btn-login" onclick="window.location.href='dashboard.html'">Log in</button>
+            <button class="btn-signup" onclick="window.location.href='dashboard.html?mode=signup'">Sign up</button>
+        </div>
+    </header>
+
+    <main class="pricing-section">
+        <div class="section-header">
+            <h2>Select your plan</h2>
+            <p>Flexible options for organizations and individuals</p>
+        </div>
+
+        <div class="pricing-grid">
+            <!-- Standard Plan -->
+            <div class="pricing-card">
+                <h3>GEO/SEO Standard</h3>
+                <p class="hero-description">Basic optimizations for steady growth and better search ranking.</p>
+                <div class="price">50$<span>/mo</span></div>
+                <ul class="card-features">
+                    <li><i data-lucide="check-circle-2"></i> General GEO/SEO increase guaranteed</li>
+                    <li><i data-lucide="check-circle-2"></i> External web help</li>
+                    <li><i data-lucide="check-circle-2"></i> Code suggestions</li>
+                    <li><i data-lucide="check-circle-2"></i> Monthly meeting</li>
+                </ul>
+                <button class="btn-pricing secondary">Get Started</button>
+            </div>
+
+            <!-- Plus Plan (Featured) -->
+            <div class="pricing-card featured">
+                <div
+                    style="position: absolute; top: 16px; right: 24px; background: var(--accent-color); color: var(--primary-color); font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 99px;">
+                    POPULAR</div>
+                <h3>GEO/SEO Plus & Support</h3>
+                <p class="hero-description">Advanced visibility strategies and dedicated technical support.</p>
+                <div class="price">150$<span>/mo</span></div>
+                <ul class="card-features">
+                    <li><i data-lucide="check-circle-2"></i> High GEO SEO visibility increase</li>
+                    <li><i data-lucide="check-circle-2"></i> Code fixes & Implementation</li>
+                    <li><i data-lucide="check-circle-2"></i> Critical page issues resolved</li>
+                    <li><i data-lucide="check-circle-2"></i> External web management</li>
+                    <li><i data-lucide="check-circle-2"></i> Weekly consultations</li>
+                </ul>
+                <button class="btn-pricing primary">Choose Plus</button>
+            </div>
+
+            <!-- MVP Plan -->
+            <div class="pricing-card">
+                <h3>MVP SaaS Product</h3>
+                <p class="hero-description">End-to-end product development with a focus on speed and security.</p>
+                <div class="price">300-5k$<span> (one-time)</span></div>
+                <ul class="card-features">
+                    <li><i data-lucide="check-circle-2"></i> Super fast delivery</li>
+                    <li><i data-lucide="check-circle-2"></i> High standard protection</li>
+                    <li><i data-lucide="check-circle-2"></i> Top-tier security audit</li>
+                    <li><i data-lucide="check-circle-2"></i> Deployment & Launch support</li>
+                    <li><i data-lucide="check-circle-2"></i> Strategic consultation</li>
+                </ul>
+                <button class="btn-pricing secondary">Request MVP</button>
+            </div>
+        </div>
+
+        <p class="pricing-note">
+            * All packages require initial meetings and ongoing consultations to ensure maximum performance.
+        </p>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="copyright">
+                © 2026 Nuclear AI. All rights reserved.
+            </div>
+            <div class="legal-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">GDPR Compliance</a>
+                <a href="#">Cookie Settings</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

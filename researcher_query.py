@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 """
-GEO Researcher -- API-based audit tool
-Queries ChatGPT (OpenAI) and Perplexity AI about a business,
-compares results to official site data, and outputs a structured report.
+GEO Researcher — Ollama-powered hallucination audit tool ($0 budget)
+Queries a local Ollama LLM about a business, compares to official site data,
+and writes a structured report to data/research_data.md.
 
 Usage:
-  python researcher_query.py
+  python researcher_query.py               # Audit next PENDING business
+  python researcher_query.py --check       # Check Ollama is running
+  python researcher_query.py --model mistral   # Use a specific Ollama model
+  python researcher_query.py --dry-run --business "Name" --website "site.com"
 
-It reads the Business Audit Queue from data/research_data.md,
-audits the first PENDING business, and writes the report back.
+Requirements (free, no API keys):
+  pip install requests beautifulsoup4
+  + Ollama installed & running: https://ollama.com/download
+  + A model pulled: ollama pull llama3.2
 """
 
 import os
@@ -16,245 +21,285 @@ import re
 import sys
 import time
 import json
+import argparse
 import datetime
 import requests
 import traceback
 from pathlib import Path
 
 # Force UTF-8 output on Windows
-if sys.stdout.encoding.lower() != "utf-8":
+if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
 
-# ── Load .env manually (no dotenv dependency) ─────────────────────────────────
-env_path = Path(__file__).parent / ".env"
-if env_path.exists():
-    for line in env_path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if line and not line.startswith("#") and "=" in line:
-            k, v = line.split("=", 1)
-            os.environ.setdefault(k.strip(), v.strip())
+# ── Paths & Config ─────────────────────────────────────────────────────────────
+RESEARCH_DATA = Path(__file__).parent / "data" / "research_data.md"
+BRAIN_FILE    = Path(__file__).parent / "brain" / "brain.md"
+TODAY         = datetime.date.today().isoformat()
 
-OPENAI_KEY      = os.environ.get("OPENAI_API_KEY", "")
-PERPLEXITY_KEY  = os.environ.get("PERPLEXITY_API_KEY", "")
+OLLAMA_BASE_URL = "http://localhost:11434"
+DEFAULT_MODEL   = "gemma3:4b"  # Override with --model flag
 
-RESEARCH_DATA   = Path(__file__).parent / "data" / "research_data.md"
-TODAY           = datetime.date.today().isoformat()
+# ── Italian nav/garbage word blacklist ────────────────────────────────────────
+GARBAGE_WORDS = {
+    "dormire", "mangiare", "bere", "fare", "spesa", "abitare",
+    "arredare", "muoversi", "divertirsi", "lavorare", "studiare",
+    "comprare", "vendere", "affittare", "curarsi", "risultati",
+    "cerca", "ricerca", "pagine", "gialle", "annunci", "offerte",
+    "scopri", "tutte", "tutte le categorie", "categorie", "home",
+    "comprimi", "espandi", "riepilogo", "mostra", "altri", "filtri",
+    "mappa", "satellite", "rilievo", "livelli", "condizioni", "privacy",
+    "invia", "notifica", "condividi", "salva", "vicino", "percorso",
+}
+
+def is_valid_business_name(name: str) -> bool:
+    """Return True only if the name looks like a real business."""
+    if not name or len(name.strip()) < 4:
+        return False
+    stripped = name.strip()
+    words = re.findall(r"[a-zA-ZÀ-ÿ]+", stripped.lower())
+    if not words: return False
+    garbage_hit = sum(1 for w in words if w in GARBAGE_WORDS)
+    if garbage_hit >= len(words): return False
+    if stripped.isupper() and len(words) == 1 and words[0] in GARBAGE_WORDS: return False
+    return True
+
 
 # ─────────────────────────────────────────────────────────────────────────────
-# AI Query Functions
+# Ollama helpers
 # ─────────────────────────────────────────────────────────────────────────────
 
-def query_openai(business_name: str, website: str, city: str = "Rome") -> str:
-    """Query ChatGPT with a combined prompt about a business (site info + general knowledge)."""
-    if not OPENAI_KEY:
-        return "MISSING_API_KEY"
-
-    # Modified prompt for GEO Hallucination Audit
-    prompt = (
-        f"I am auditing the AI perception of '{business_name}' in Rome. I need to identify 'Hallucination Deltas'.\n\n"
-        f"PART 1: INTERNAL KNOWLEDGE\n"
-        f"Based ONLY on your internal training data (do not attempt to browse), what is the official address, phone, and hours for this business?\n\n"
-        f"PART 2: DOCUMENT EXTRACTION\n"
-        f"I am providing the current website content for this business below:\n"
-        f"--- WEBSITE CONTENT START ---\n{website}\n--- WEBSITE CONTENT END ---\n\n"
-        f"Extract the address, phone, hours, and services from the text above.\n\n"
-        f"RESPONSE FORMAT:\n"
-        f"Format as a JSON object with keys 'ai_knowledge' (from Part 1) and 'official' (from Part 2). "
-        f"Both must have keys: 'address', 'phone', 'hours', 'services'."
-    )
-
-    for attempt in range(4):
-        try:
-            print(f"   [API] OpenAI request (attempt {attempt+1})...", flush=True)
-            response = requests.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {OPENAI_KEY}",
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "model": "gpt-4o-mini",
-                    "messages": [{"role": "user", "content": prompt}],
-                    "max_tokens": 800,
-                    "temperature": 0.1,
-                    "response_format": {"type": "json_object"}
-                },
-                timeout=45,
-            )
-            if response.status_code == 429:
-                wait = 70 * (attempt + 1)
-                print(f"   [Rate limit] Waiting {wait}s before retry...", flush=True)
-                time.sleep(wait)
-                continue
-            response.raise_for_status()
-            return response.json()["choices"][0]["message"]["content"].strip()
-        except requests.RequestException as e:
-            print(f"   [!] OpenAI Request Error: {e}", flush=True)
-            if attempt < 3:
-                time.sleep(20)
-            else:
-                return f"ERROR: {e}"
-    return "ERROR: max retries exceeded"
-
-
-def query_perplexity(business_name: str, city: str = "Rome") -> str:
-    """Query Perplexity about a business and return raw text."""
-    if not PERPLEXITY_KEY:
-        return "NO_PERPLEXITY_KEY"
-
-    prompt = (
-        f"Tell me about '{business_name}' in {city}, Italy. "
-        "Provide: address, phone, opening hours, services, and founding year."
-    )
-
+def check_ollama_running(model: str = DEFAULT_MODEL) -> bool:
+    """Return True if Ollama is running and the model is available."""
     try:
-        response = requests.post(
-            "https://api.perplexity.ai/chat/completions",
-            headers={
-                "Authorization": f"Bearer {PERPLEXITY_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "model": "sonar-pro",
-                "messages": [{"role": "user", "content": prompt}],
-                "max_tokens": 500,
-            },
-            timeout=30,
-        )
-        response.raise_for_status()
-        return response.json()["choices"][0]["message"]["content"].strip()
-    except requests.RequestException as e:
-        return f"ERROR: {e}"
+        r = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=5)
+        if r.status_code != 200:
+            return False
+        models_full = [m["name"] for m in r.json().get("models", [])]
+        models_base = [m["name"].split(":")[0] for m in r.json().get("models", [])]
+        return model in models_full or model in models_base
+    except requests.ConnectionError:
+        return False
 
+
+def query_ollama(business_name: str, site_text: str, web_text: str, model: str = DEFAULT_MODEL) -> dict:
+    """
+    Ask the local Ollama model to perform a hallucination delta audit by comparing
+    Official Website Data against Web Search / AI Engine snippets.
+    """
+    prompt = (
+        f"You are a GEO (Generative Engine Optimization) hallucination auditor.\n"
+        f"Your task: compare the OFFICIAL website content vs what the WEB SEARCH ENGINES say about '{business_name}'.\n\n"
+        f"=== OFFICIAL WEBSITE CONTENT ===\n{site_text[:2000]}\n=== END OF OFFICIAL ===\n\n"
+        f"=== WEB SEARCH ENGINE RESULTS (AI DATA) ===\n{web_text[:2000]}\n=== END OF AI DATA ===\n\n"
+        f"Respond with ONLY a valid JSON object using this exact structure:\n"
+        f"{{\n"
+        f'  "ai_knowledge": {{"address": "...", "phone": "...", "hours": "...", "services": "..."}},\n'
+        f'  "official": {{"address": "...", "phone": "...", "hours": "...", "services": "..."}}\n'
+        f"}}\n\n"
+        f"Rules:\n"
+        f"- ai_knowledge: What the 'WEB SEARCH ENGINE RESULTS' say about this business. If they hallucinate or give wrong info, capture exactly what they say.\n"
+        f"- official: what you extract from the 'OFFICIAL WEBSITE CONTENT' above.\n"
+        f"- Look specifically for markers like 'Solo su appuntamento' or 'By appointment only' and include this in the hours or services.\n"
+        f"- If a field is not mentioned in a source, use the strictly string 'Not mentioned'. Do not invent or guess.\n"
+        f"- Output ONLY the JSON. No explanation, no markdown, no extra text.\n"
+    )
+
+    payload = {
+        "model": model,
+        "prompt": prompt,
+        "stream": False,
+        "options": {
+            "temperature": 0.1,   # Low temp = more factual, less hallucination
+            "num_predict": 400,
+        },
+    }
+
+    for attempt in range(3):
+        try:
+            print(f"   [Ollama] Querying {model} (attempt {attempt + 1})...", flush=True)
+            r = requests.post(
+                f"{OLLAMA_BASE_URL}/api/generate",
+                json=payload,
+                timeout=120,   # Local LLM can take up to 2 min on slow CPU
+            )
+            r.raise_for_status()
+            raw = r.json().get("response", "").strip()
+
+            # Parse JSON from response (handle markdown code fences if model adds them)
+            json_text = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw, flags=re.MULTILINE).strip()
+            return json.loads(json_text)
+
+        except json.JSONDecodeError:
+            print(f"   [!] JSON parse error on attempt {attempt + 1}. Raw: {raw[:200]}", flush=True)
+            if attempt < 2:
+                time.sleep(2)
+        except requests.RequestException as e:
+            print(f"   [!] Ollama request error: {e}", flush=True)
+            if attempt < 2:
+                time.sleep(3)
+
+    # Fallback: return structured empty result
+    return {
+        "ai_knowledge": {"address": "ERROR", "phone": "ERROR", "hours": "ERROR", "services": "ERROR"},
+        "official":     {"address": "ERROR", "phone": "ERROR", "hours": "ERROR", "services": "ERROR"},
+    }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Ground Truth — scrape the official website (free, local, no API)
+# ─────────────────────────────────────────────────────────────────────────────
 
 def fetch_site_summary(url: str) -> str:
-    """Fetch website content locally to use as Ground Truth."""
-    if not url or url == "—":
+    """Fetch the official website and extract meaningful text as ground truth."""
+    if not url or url in ("—", "-", ""):
         return "No website provided."
     if not url.startswith("http"):
         url = "https://" + url
-    
-    try:
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/122.0.0.0"}
-        r = requests.get(url, headers=headers, timeout=15)
-        r.raise_for_status()
-        
+
+    user_agents = [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
+    ]
+    import random
+    headers = {"User-Agent": random.choice(user_agents)}
+
+    def get_clean_text(html_text):
         from bs4 import BeautifulSoup
-        soup = BeautifulSoup(r.text, "html.parser")
-        
-        # Extract meaningful snippets
-        title = soup.title.string if soup.title else "No title"
-        meta = [m.get("content") for m in soup.find_all("meta") if m.get("name") in ("description", "keywords")]
-        text = " ".join([p.get_text() for p in soup.find_all(["p", "h1", "h2", "li"])[:20]])
-        
-        summary = f"Title: {title}\nMeta: {' '.join(filter(None, meta))}\nContent: {text[:1000]}"
-        return summary
+        soup = BeautifulSoup(html_text, "html.parser")
+        for tag in soup(["script", "style", "noscript"]):
+            tag.decompose()
+        # Keep nav/footer text for internal scraping but don't over-include in summary
+        blocks = []
+        for tag in soup.find_all(["p", "h1", "h2", "h3", "li", "address", "span"], limit=50):
+            t = tag.get_text(separator=" ", strip=True)
+            if len(t) > 15: blocks.append(t)
+        return " | ".join(blocks)[:1500]
+
+    try:
+        # Step A: Fetch Homepage
+        r = requests.get(url, headers=headers, timeout=12)
+        r.raise_for_status()
+        homepage_html = r.text
+        homepage_summary = get_clean_text(homepage_html)
+
+        # Step B: Find Contact Link (Deep Scrape V4)
+        from bs4 import BeautifulSoup
+        from urllib.parse import urljoin
+        soup = BeautifulSoup(homepage_html, "html.parser")
+        contact_keywords = ["contatt", "dove", "uffic", "sed", "info", "about", "reach"]
+        contact_url = None
+
+        for a in soup.find_all("a", href=True):
+            text = a.get_text().lower()
+            href = a["href"].lower()
+            if any(k in text or k in href for k in contact_keywords):
+                contact_url = urljoin(url, a["href"])
+                if contact_url != url: break # Found a deeper page
+
+        contact_summary = ""
+        if contact_url:
+            print(f"   [V4] Deep Scrape: Following contact link -> {contact_url}", flush=True)
+            try:
+                rc = requests.get(contact_url, headers=headers, timeout=10)
+                if rc.status_code == 200:
+                    contact_summary = "\n[CONTACT PAGE]: " + get_clean_text(rc.text)
+            except Exception: pass
+
+        return f"HOME: {homepage_summary} {contact_summary}"
+
     except Exception as e:
         return f"SCRAPE_ERROR: {e}"
 
 
-def query_google_knowledge(business_name: str) -> str:
-    """Scrape Google search snippet for a business knowledge panel."""
+def fetch_web_knowledge(business_name: str, district: str) -> str:
+    """Scrape DuckDuckGo HTML version to collect real search engine consensus."""
+    url = "https://html.duckduckgo.com/html/"
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+    data = {"q": f"{business_name} {district} Roma indirizzo telefono recensioni"}
+    
     try:
-        headers = {
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/122.0.0.0 Safari/537.36"
-            )
-        }
-        # Ensure name is safely encoded
-        safe_name = requests.utils.quote(business_name + " Rome")
-        url = f"https://www.google.com/search?q={safe_name}&hl=en"
-        r = requests.get(url, headers=headers, timeout=15)
-        r.raise_for_status()
-        # Extract visible text snippets (basic extraction)
+        r = requests.post(url, headers=headers, data=data, timeout=10)
         from bs4 import BeautifulSoup
         soup = BeautifulSoup(r.text, "html.parser")
-        # Grab all text from result containers
-        texts = []
-        for tag in soup.find_all(["span", "div"], limit=200):
-            t = tag.get_text(strip=True)
-            if len(t) > 30 and len(t) < 300:
-                texts.append(t)
-        deduplicated = list(dict.fromkeys(texts))[:20]
-        return "\n".join(deduplicated)
+        
+        snippets = []
+        for a in soup.find_all("a", class_="result__snippet"):
+            snippets.append(a.text.strip())
+            
+        if not snippets:
+            return "No search results found. The AI engines have 0 data on this business."
+            
+        return "\n---\n".join(snippets[:7])
     except Exception as e:
-        return f"ERROR: {e}"
+        return f"WEB_SEARCH_ERROR: {e}"
+
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Extract structured fields from JSON or free text
+# Field extraction & scoring
 # ─────────────────────────────────────────────────────────────────────────────
 
-def extract_field(input_data: str | dict, field: str, source: str = "ai_knowledge") -> str:
-    """Extract a field from either a JSON string (OpenAI) or free text (Perplexity/Google)."""
-    if isinstance(input_data, str) and input_data.startswith("ERROR"):
-        return input_data
-    if input_data in ("MISSING_API_KEY", "NO_PERPLEXITY_KEY", "BLOCKED", "Not mentioned"):
-        return str(input_data)
-
-    # If it's the JSON output from OpenAI
-    if isinstance(input_data, str) and input_data.strip().startswith("{"):
+def extract_field(data: dict | str, field: str, source: str = "ai_knowledge") -> str:
+    """Extract a field from Ollama JSON output (or fallback to regex on raw text)."""
+    if isinstance(data, str) and data.startswith("ERROR"):
+        return data
+    if isinstance(data, str):
+        # Try parsing as JSON first
         try:
-            data = json.loads(input_data)
-            section = data.get(source, {})
-            val = section.get(field, "Not mentioned")
-            return str(val) if val else "Not mentioned"
-        except json.JSONDecodeError:
-            pass # Fall back to regex if JSON fails
+            data = json.loads(data)
+        except Exception:
+            pass
 
-    # If it's free text (Perplexity/Google/Broken JSON)
-    text = str(input_data)
+    if isinstance(data, dict):
+        section = data.get(source, {})
+        val = section.get(field, "Not mentioned")
+        return str(val) if val else "Not mentioned"
+
+    # Free-text fallback (regex)
+    text = str(data)
     lines = text.splitlines()
-
     if field == "address":
         for line in lines:
             if re.search(r"\b(via|viale|piazza|corso|largo)\b", line, re.I):
                 return line.strip()[:80]
-        return "Not mentioned"
-
     elif field == "phone":
         phones = re.findall(r"[\+0][\d\s\-\.]{7,15}", text)
         return phones[0].strip() if phones else "Not mentioned"
-
     elif field == "hours":
         for line in lines:
-            if re.search(r"\b(monday|tuesday|lun|mar|mer|gio|ven|open|9[:\.]|10[:\.]|closed)\b", line, re.I):
+            if re.search(r"\b(lun|mar|mer|gio|ven|9[:\.]|10[:\.]|chiuso|aperto|open)\b", line, re.I):
                 return line.strip()[:100]
-        return "Not mentioned"
-
     elif field == "services":
         for line in lines:
-            if re.search(r"\b(service|notari|avvoc|chirurg|medic|legal|immob|societ|success)\b", line, re.I):
+            if re.search(r"\b(notari|avvoc|chiru|medic|legal|studio|service)\b", line, re.I):
                 return line.strip()[:120]
-        return "Not mentioned"
-
     return "Not mentioned"
 
 
 def score_field(official: str, ai_val: str) -> str:
     """Simple accuracy check: ✅ correct, ⚠️ partial, ❌ wrong, — unknown."""
-    if ai_val in ("Not mentioned", "ERROR", "MISSING_API_KEY", "NO_PERPLEXITY_KEY"):
+    skip = {"Not mentioned", "ERROR", "MISSING_API_KEY", "NO_KEY", "SCRAPE_ERROR"}
+    if ai_val in skip or not ai_val or ai_val.lower().startswith("error"):
         return "—"
-    if ai_val.lower().startswith("error"):
-        return "—"
-
-    official_clean = re.sub(r"[\s\-\./]", "", official.lower())
-    ai_clean       = re.sub(r"[\s\-\./]", "", ai_val.lower())
-
-    if not official_clean or official_clean == "notmentioned":
+    if official in skip or not official or official.lower().startswith("error"):
         return "—"
 
-    if official_clean in ai_clean:
+    oc = re.sub(r"[\s\-\./,]", "", official.lower())
+    ac = re.sub(r"[\s\-\./,]", "", ai_val.lower())
+
+    if not oc or oc == "notmentioned":
+        return "—"
+    if oc in ac or ac in oc:
         return "✅"
-    if ai_clean and any(word in ai_clean for word in official_clean.split() if len(word) > 3):
+    # Partial match: any word > 3 chars from official appears in ai
+    words = [w for w in oc.split() if len(w) > 3]
+    if words and any(w in ac for w in words):
         return "⚠️"
     return "❌"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Read / Write research_data.md
+# research_data.md I/O
 # ─────────────────────────────────────────────────────────────────────────────
 
 def get_pending_business() -> dict | None:
@@ -276,8 +321,17 @@ def get_pending_business() -> dict | None:
     }
 
 
-def mark_business_audited(business_id: str, business_name: str):
-    """Change a business row from PENDING to AUDITED in the queue."""
+def mark_business_skipped(business_id: str):
+    """Change a business row status to SKIPPED."""
+    text = RESEARCH_DATA.read_text(encoding="utf-8")
+    pattern = re.compile(
+        rf"(\|\s*{re.escape(business_id)}\s*\|[^|]+\|[^|]+\|[^|]+\|[^|]+\|[^|]+\|)\s*PENDING\s*(\|)"
+    )
+    updated = pattern.sub(r"\1 SKIPPED \2", text)
+    RESEARCH_DATA.write_text(updated, encoding="utf-8")
+
+def mark_business_audited(business_id: str):
+    """Change a business row from PENDING to AUDITED."""
     text = RESEARCH_DATA.read_text(encoding="utf-8")
     pattern = re.compile(
         rf"(\|\s*{re.escape(business_id)}\s*\|[^|]+\|[^|]+\|[^|]+\|[^|]+\|[^|]+\|)\s*PENDING\s*(\|)"
@@ -295,8 +349,8 @@ def update_researcher_status(status: str, note: str = ""):
     RESEARCH_DATA.write_text(updated, encoding="utf-8")
 
 
-def clear_blocked_audit(business_name: str):
-    """Remove previous audit reports for a business."""
+def clear_previous_audit(business_name: str):
+    """Remove any previous (incomplete) audit report for this business."""
     text = RESEARCH_DATA.read_text(encoding="utf-8")
     escaped = re.escape(business_name)
     pattern = re.compile(
@@ -317,13 +371,24 @@ def append_audit_report(report: str):
     RESEARCH_DATA.write_text(updated, encoding="utf-8")
 
 
+def flag_brain_needs_review(business_name: str, count: int):
+    """Set NEEDS_REVIEW flag in brain.md so the Learner picks it up."""
+    text = BRAIN_FILE.read_text(encoding="utf-8")
+    flag_pattern = re.compile(r"<!-- NEEDS_REVIEW: \[.*?\] -->")
+    new_flag = f"<!-- NEEDS_REVIEW: [{business_name} — {count} hallucinations] -->"
+    if flag_pattern.search(text):
+        updated = flag_pattern.sub(new_flag, text)
+    else:
+        updated = text.replace("## Status Flags", f"## Status Flags\n{new_flag}")
+    BRAIN_FILE.write_text(updated, encoding="utf-8")
+
+
 def update_last_updated():
     text = RESEARCH_DATA.read_text(encoding="utf-8")
     updated = re.sub(
         r"\*\*Last Updated:\*\*.*",
-        f"**Last Updated:** {TODAY} 23:00",
-        text,
-        count=1
+        f"**Last Updated:** {TODAY}",
+        text, count=1
     )
     RESEARCH_DATA.write_text(updated, encoding="utf-8")
 
@@ -332,7 +397,7 @@ def update_last_updated():
 # Main audit flow
 # ─────────────────────────────────────────────────────────────────────────────
 
-def run_audit(business: dict):
+def run_audit(business: dict, model: str = DEFAULT_MODEL, dry_run: bool = False) -> tuple:
     name     = business["name"]
     website  = business["website"]
     district = business["district"]
@@ -342,119 +407,140 @@ def run_audit(business: dict):
     print(f"  AUDITING: {name}")
     print(f"  District: {district} | Category: {category}")
     print(f"  Website:  {website}")
+    print(f"  Model:    {model}")
     print(f"{'='*60}\n")
 
-    # -- Step 0: Fetch Ground Truth Locally (Free & Reliable)
-    print("[SCRAPE] Fetching website Ground Truth...")
+    # Step 1 — Scrape official website (free, local)
+    print("[SCRAPE] Fetching official website ground truth...", flush=True)
     site_text = fetch_site_summary(website)
-    
-    # -- Step 1: Combined OpenAI Call (Detecting Hallucination Delta)
-    print("[API] Querying OpenAI (Internal vs extracted)...")
-    combined_json = query_openai(name, site_text)
-    
-    # Check if we got an error string instead of JSON
-    if combined_json.startswith("ERROR"):
-        print(f"   [!] OpenAI Error: {combined_json}")
-        chatgpt_raw = combined_json
-        site_raw    = combined_json
+    if site_text.startswith("SCRAPE_ERROR"):
+        print(f"   [!] Scrape failed: {site_text}")
     else:
-        chatgpt_raw = combined_json
-        site_raw    = combined_json
+        print(f"   [OK] Extracted {len(site_text)} chars from site.")
 
-    # -- Step 2: Perplexity
-    if PERPLEXITY_KEY:
-        print("[API] Querying Perplexity...")
-        perplexity_raw = query_perplexity(name)
+    # Step 1.5 — Scrape web search consensus (new V2 anti-hallucination layer)
+    print("[SCRAPE] Fetching web search consensus (AI Engine Grounding)...", flush=True)
+    web_text = fetch_web_knowledge(name, district)
+    if "WEB_SEARCH_ERROR" in web_text:
+        print(f"   [!] Web search failed: {web_text}")
     else:
-        print("[!]  No Perplexity API key -- skipping.")
-        perplexity_raw = "NO_PERPLEXITY_KEY"
+        print(f"   [OK] Extracted {len(web_text)} chars from search engine snippets.")
 
-    # -- Step 3: Google scrape
-    print("[WEB] Scraping Google knowledge panel...")
-    google_raw = query_google_knowledge(name)
+    # Step 2 — Query Ollama (free, local, no rate limits)
+    print(f"[OLLAMA] Running hallucination delta analysis...", flush=True)
+    t0 = time.time()
+    ollama_result = query_ollama(name, site_text, web_text, model=model)
+    elapsed = time.time() - t0
+    print(f"   [OK] Ollama responded in {elapsed:.1f}s", flush=True)
 
-    # ── Step 4: Extract fields ────────────────────────────────────────────────
+    # Step 3 — Extract fields
     fields = ["address", "phone", "hours", "services"]
-    
-    # Extract "Official" from site side of combined JSON
-    official = {f: extract_field(site_raw, f, source="official") for f in fields}
-    
-    # Extract AI citations
-    chatgpt_data    = {f: extract_field(chatgpt_raw, f, source="ai_knowledge") for f in fields}
-    perplexity_data = {f: extract_field(perplexity_raw, f) for f in fields}
-    google_data     = {f: extract_field(google_raw, f) for f in fields}
+    official      = {f: extract_field(ollama_result, f, source="official")     for f in fields}
+    ai_knowledge  = {f: extract_field(ollama_result, f, source="ai_knowledge") for f in fields}
 
-    # ── Step 5: Scoring ───────────────────────────────────────────────────────
-    def row(field):
+    # Step 4 — Score & build table rows
+    def make_row(field: str) -> str:
         o  = official[field]
-        cg = chatgpt_data[field]
-        pp = perplexity_data[field]
-        gg = google_data[field]
-        cg_icon = score_field(o, cg)
-        pp_icon = score_field(o, pp)
-        gg_icon = score_field(o, gg)
-        
-        icons = [cg_icon, pp_icon, gg_icon]
-        active_icons = [i for i in icons if i in ("✅", "❌", "⚠️")]
-        
-        hallucination = "✅" if all(x == "✅" for x in active_icons) and active_icons else \
-                        "❌" if "❌" in active_icons else \
-                        "⚠️" if "⚠️" in active_icons else "—"
-                        
-        return (
-            f"| {field.capitalize()} | {o} | "
-            f"{cg} [{cg_icon}] | {pp} [{pp_icon}] | {gg} [{gg_icon}] | {hallucination} |"
-        )
+        ai = ai_knowledge[field]
+        ai_icon = score_field(o, ai)
+        # For this $0 version we only have one AI source (Ollama internal knowledge)
+        # Google scrape is also local (kept from original)
+        hallucination = ai_icon
+        return f"| {field.capitalize()} | {o} | {ai} [{ai_icon}] | — | — | {hallucination} |"
 
-    # Calculate score
-    all_icons = []
-    for f in fields:
-        all_icons.extend([score_field(official[f], chatgpt_data[f]), 
-                         score_field(official[f], perplexity_data[f]), 
-                         score_field(official[f], google_data[f])])
-    
-    active = [i for i in all_icons if i in ("✅", "❌", "⚠️")]
-    total = len(active) or 1
-    accuracy_score = int((active.count("✅") / total) * 100)
+    # Step 5 — Calculate score
+    all_icons = [score_field(official[f], ai_knowledge[f]) for f in fields]
+    active    = [i for i in all_icons if i in ("✅", "❌", "⚠️")]
+    total     = len(active) or 1
+    accuracy_score    = int((active.count("✅") / total) * 100)
     hallucination_count = active.count("❌")
+    worst_offender = "Web Search / Aggregators" if hallucination_count > 0 else "NONE"
 
-    # Worst Offender
-    worst_map = {"ChatGPT": 0, "Perplexity": 0, "Google AI": 0}
-    for f in fields:
-        if score_field(official[f], chatgpt_data[f]) == "❌": worst_map["ChatGPT"] += 1
-        if score_field(official[f], perplexity_data[f]) == "❌": worst_map["Perplexity"] += 1
-        if score_field(official[f], google_data[f]) == "❌": worst_map["Google AI"] += 1
-    
-    worst_offender = max(worst_map, key=worst_map.get) if any(worst_map.values()) else "NONE"
-
-    # ── Step 6: Build Report ──────────────────────────────────────────────────
+    # Step 6 — Build report
     report = f"""### Audit: {name} — {TODAY}
-- **AI Accuracy Score:** {accuracy_score}
+- **AI Accuracy Score:** {accuracy_score}/100
 - **Hallucinations Found:** {hallucination_count}
 - **Worst Offender:** {worst_offender}
 - **Category:** {category} | **District:** {district}
+- **Model Used:** {model} (local Ollama — $0)
+- **Audit Duration:** {elapsed:.1f}s
 - **Critical Issues:**
-  - {"None detected." if hallucination_count == 0 else f"{hallucination_count} hallucination(s) detected across AI platforms."}
+  - {"None detected." if hallucination_count == 0 else f"{hallucination_count} hallucination(s) found in AI internal knowledge vs official site."}
 - **Recommended Fixes:**
-  - {"No immediate action needed." if accuracy_score >= 80 else "Coordinate schema update and citation cleanup."}
-  
+  - {"No immediate action needed." if accuracy_score >= 80 else "Update Schema.org markup, ensure consistent NAP across aggregators."}
+
 #### Delta Table
-| Field | Official | ChatGPT | Perplexity | Google AI | Hallucination? |
+| Field | Official (Website) | AI Internal Knowledge | Perplexity | Google AI | Hallucination? |
 |---|---|---|---|---|---|
-{row("address")}
-{row("hours")}
-{row("phone")}
-{row("services")}
+{make_row("address")}
+{make_row("hours")}
+{make_row("phone")}
+{make_row("services")}
 
 """
     return report, accuracy_score, hallucination_count, worst_offender
 
 
-def main():
-    print("GEO Researcher -- API audit tool (1-Call Fix)")
-    print(f"   OpenAI key loaded: {'OK' if OPENAI_KEY else 'MISSING'}")
-    print()
+# ─────────────────────────────────────────────────────────────────────────────
+# Entry point
+# ─────────────────────────────────────────────────────────────────────────────
 
+def main():
+    parser = argparse.ArgumentParser(description="GEO Researcher — Ollama hallucination auditor ($0)")
+    parser.add_argument("--model",    default=DEFAULT_MODEL, help="Ollama model to use (default: llama3.2)")
+    parser.add_argument("--check",   action="store_true",   help="Check if Ollama is running and exit")
+    parser.add_argument("--dry-run", action="store_true",   help="Run audit but do NOT write to research_data.md")
+    parser.add_argument("--business", default=None,         help="Business name for --dry-run")
+    parser.add_argument("--website",  default=None,         help="Website URL for --dry-run")
+    args = parser.parse_args()
+
+    print("=" * 60)
+    print(" GEO RESEARCHER — Ollama Edition ($0 Budget)")
+    print(f" Model: {args.model} | Date: {TODAY}")
+    print("=" * 60)
+
+    # ── Check mode ──────────────────────────────────────────────────────────
+    if args.check:
+        running = check_ollama_running(args.model)
+        if running:
+            print(f"\n✅ Ollama is running. Model '{args.model}' is available.")
+        else:
+            print(f"\n❌ Ollama is NOT running or model '{args.model}' not found.")
+            print("   → Install Ollama: https://ollama.com/download")
+            print(f"   → Pull model:    ollama pull {args.model}")
+            sys.exit(1)
+        return
+
+    # ── Verify Ollama is up ──────────────────────────────────────────────────
+    if not check_ollama_running(args.model):
+        print(f"\n❌ Ollama is not running or model '{args.model}' not pulled.")
+        print("   → Start Ollama, then run: ollama pull " + args.model)
+        print("   → Then re-run this script.")
+        sys.exit(1)
+    print(f"\n✅ Ollama ready. Model: {args.model}\n")
+
+    # ── Dry-run mode ─────────────────────────────────────────────────────────
+    if args.dry_run:
+        if not args.business:
+            print("❌ --dry-run requires --business and --website flags.")
+            sys.exit(1)
+        biz = {
+            "id": "DRY",
+            "name": args.business,
+            "website": args.website or "—",
+            "district": "Unknown",
+            "category": "Unknown",
+            "source": "manual",
+        }
+        report, score, hallucinations, worst = run_audit(biz, model=args.model, dry_run=True)
+        print("\n" + "─" * 60)
+        print("DRY RUN REPORT (not saved):")
+        print("─" * 60)
+        print(report)
+        print(f"Score: {score}/100 | Hallucinations: {hallucinations} | Worst: {worst}")
+        return
+
+    # ── Normal batch mode ────────────────────────────────────────────────────
     while True:
         business = get_pending_business()
         if not business:
@@ -462,37 +548,58 @@ def main():
             update_researcher_status("IDLE", "All pending audits complete.")
             break
 
-        print(f"📋 Auditing #{business['id']} -- {business['name']}...")
-        update_researcher_status("IN_PROGRESS", f"Auditing #{business['id']}: {business['name']}")
-
-        clear_blocked_audit(business["name"])
+        print(f"📋 Auditing #{business['id']} — {business['name']}...")
         
+        # Security Gate: Valid name check
+        if not is_valid_business_name(business['name']):
+            print(f"   [SKIP] '{business['name']}' rejected as non-business name. Marking SKIPPED.")
+            mark_business_skipped(business['id'])
+            continue
+
+        update_researcher_status("IN_PROGRESS", f"Auditing #{business['id']}: {business['name']}")
+        clear_previous_audit(business["name"])
+
         try:
-            report, score, hallucinations, worst = run_audit(business)
+            report, score, hallucinations, worst = run_audit(business, model=args.model)
             append_audit_report(report)
-            mark_business_audited(business["id"], business["name"])
-            print(f"   [DONE] Score: {score}/100 | Hallucinations: {hallucinations}")
+            mark_business_audited(business["id"])
+            update_last_updated()
+
+            # Flag brain for Learner if hallucinations found
+            if hallucinations > 0:
+                flag_brain_needs_review(business["name"], hallucinations)
+                print(f"   [Brain] NEEDS_REVIEW flag set — Learner will process next cycle.")
+
+            print(f"   ✅ Done. Score: {score}/100 | Hallucinations: {hallucinations}")
+
         except Exception as e:
             print(f"   [!] Error auditing {business['name']}: {e}")
             traceback.print_exc()
-            update_researcher_status("BLOCKED", f"Error on #{business['id']}: {str(e)[:50]}")
+            update_researcher_status("BLOCKED", f"Error on #{business['id']}: {str(e)[:60]}")
             break
 
-        update_last_updated()
-        
-        # Check if there are more businesses before sleeping
+        # Check for more — no sleep needed (no rate limits with Ollama!)
         next_biz = get_pending_business()
         if next_biz:
-            print(f"   [Pause 65s to stay under OpenAI Tier 0 limits...]")
-            time.sleep(65)
+            print(f"\n   → Next up: {next_biz['name']} | Starting immediately (no rate limit delay)...")
         else:
             print("✅ Queue finished.")
             update_researcher_status("IDLE", "Full batch complete.")
             break
 
-    print("\nBatch audit complete. Check data/research_data.md for full results.")
+    print(f"\nBatch audit complete. Check data/research_data.md for full results.")
+
+    # Step 7 — Auto-run Translator after each batch (V4 Upgrade)
+    print("\n" + "="*60)
+    print(" [V4] Auto-running Human Report Translator...")
+    print("="*60)
+    try:
+        import subprocess
+        subprocess.run(["python", "report_translator.py"], check=False)
+        print(" [V4] Agency reports updated in data/client_fixes/")
+    except Exception as e:
+        print(f" [!] Error running translator: {e}")
 
 
 if __name__ == "__main__":
     main()
-

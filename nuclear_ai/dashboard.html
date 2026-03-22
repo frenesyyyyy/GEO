@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclear AI | Dashboard</title>
+    <!-- Use main style for typography and variables, new style for layout -->
+    <link rel="stylesheet" href="style.css?v=13">
+    <link rel="stylesheet" href="dashboard.css?v=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="dashboard-body">
+
+    <!-- Authentication View (Login / Signup) -->
+    <div id="auth-view" class="auth-section">
+        <div class="auth-card">
+            <div class="auth-header">
+                <img src="NuclearAI.png" alt="Nuclear AI" class="logo-img" style="object-fit: contain;">
+                <h2>Welcome to Nuclear AI</h2>
+                <p>Sign in or create an account to view your dashboard</p>
+            </div>
+
+            <!-- Tabs: Log in / Sign up -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthMode('login')">Log In</button>
+                <button class="auth-tab" onclick="switchAuthMode('signup')">Sign Up</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit" class="btn-submit">Log In</button>
+                <div id="login-error" class="error-msg"></div>
+            </form>
+
+            <!-- Signup Form -->
+            <form id="signup-form" class="auth-form" style="display: none;" onsubmit="handleSignup(event)">
+                <div class="auth-type-toggle">
+                    <label><input type="radio" name="account_type" value="individual" checked onchange="toggleSignupFields()"> Individual</label>
+                    <label><input type="radio" name="account_type" value="agency" onchange="toggleSignupFields()"> Agency</label>
+                </div>
+
+                <div style="display: flex; gap: 16px;">
+                    <div class="input-group" style="flex: 1;">
+                        <label>First Name</label>
+                        <input type="text" id="signup-name" required>
+                    </div>
+                    <div class="input-group" style="flex: 1;">
+                        <label>Surname</label>
+                        <input type="text" id="signup-surname" required>
+                    </div>
+                </div>
+
+                <!-- Agency Only Fields -->
+                <div id="agency-fields" style="display: none;">
+                    <div class="input-group">
+                        <label>Company Name</label>
+                        <input type="text" id="signup-company">
+                    </div>
+                    <div class="input-group">
+                        <label>Location</label>
+                        <input type="text" id="signup-location">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label id="signup-email-label">Email Address</label>
+                    <input type="email" id="signup-email" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="signup-password" required minlength="6">
+                </div>
+                <button type="submit" class="btn-submit">Sign Up</button>
+                <div id="signup-error" class="error-msg"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Dashboard View -->
+    <div id="dashboard-view" class="dashboard-layout" style="display: none;">
+        <!-- Left Sidebar -->
+        <aside class="dashboard-sidebar">
+            <div class="sidebar-header">
+                <img src="NuclearAI.png" alt="Nuclear AI" class="logo-img" style="width: 32px; height: 32px;">
+                <div class="sidebar-title">Nuclear AI's Dashboard<br><span id="user-display-name"></span></div>
+            </div>
+
+            <div class="sidebar-search">
+                <i data-lucide="search"></i>
+                <input type="text" placeholder="Quick Actions">
+            </div>
+
+            <div class="sidebar-nav">
+                <div class="nav-group">Pages</div>
+                <ul>
+                    <li class="active"><a href="#"><i data-lucide="home"></i> Overview</a></li>
+                    <li><a href="#"><i data-lucide="terminal-square"></i> Prompts</a></li>
+                    <li><a href="#"><i data-lucide="database"></i> Sources</a></li>
+                    <li><a href="#"><i data-lucide="box"></i> Models</a></li>
+                    <li><a href="#"><i data-lucide="settings"></i> Settings</a></li>
+                    <li><a href="#"><i data-lucide="shield-check"></i> Comply</a></li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-footer">
+                <button onclick="handleLogout()" class="btn-logout"><i data-lucide="log-out"></i> Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="dashboard-content">
+            <!-- Top Nav / Filters -->
+            <header class="dash-top-bar">
+                <div class="dash-filters">
+                    <button class="filter-btn active"><img src="NuclearAI.png" alt="logo" style="width: 14px; border-radius: 4px; filter: invert(1);"> Nuclear AI</button>
+                    <button class="filter-btn"><i data-lucide="calendar"></i> Last 7 days</button>
+                    <button class="filter-btn"><i data-lucide="tag"></i> All tags</button>
+                    <button class="filter-btn"><i data-lucide="cpu"></i> All Models</button>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="dash-main-area">
+                <!-- Empty State -->
+                <div class="empty-state">
+                    <div class="empty-icon"><i data-lucide="folder-search"></i></div>
+                    <h3>No Projects Started Yet</h3>
+                    <p>Connect your first data source or set up a prompt to begin tracking your Nuclear AI visibility and positioning metrics.</p>
+                    <button class="btn-primary" onclick="alert('Feature coming soon!')"><i data-lucide="plus"></i> Create Project</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
