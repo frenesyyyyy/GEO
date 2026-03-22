@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclear AI | Our Resources</title>
+    <link rel="stylesheet" href="style.css?v=13">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .resources-hero {
+            padding: 120px 20px 80px;
+            text-align: center;
+            background: radial-gradient(circle at top right, rgba(0, 240, 255, 0.05), transparent),
+                        radial-gradient(circle at bottom left, rgba(239, 68, 68, 0.05), transparent);
+        }
+
+        .ai-chat-animation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            margin: 60px auto;
+            max-width: 1000px;
+            height: 200px;
+            position: relative;
+        }
+
+        .ai-node {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            position: relative;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .ai-node svg { width: 40px; height: 40px; }
+        .ai-node.openai { animation-delay: 0s; }
+        .ai-node.claude { animation-delay: 0.5s; }
+        .ai-node.gemini { animation-delay: 1s; }
+        .ai-node.llama { animation-delay: 1.5s; }
+        .ai-node.perplexity { animation-delay: 2s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .chat-bubble {
+            position: absolute;
+            background: #111827;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            animation: talk 10s linear infinite;
+        }
+
+        @keyframes talk {
+            0%, 10%, 90%, 100% { opacity: 0; transform: translateY(0); }
+            15%, 25% { opacity: 1; transform: translateY(-50px); } /* OpenAI talks */
+            30%, 40% { opacity: 0; }
+            45%, 55% { opacity: 1; transform: translateY(-50px); } /* Gemini answers */
+            60%, 70% { opacity: 0; }
+        }
+
+        .brain-viz-section {
+            padding: 100px 20px;
+            background: #fff;
+            text-align: center;
+        }
+
+        .brain-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 0 auto 60px;
+        }
+
+        .brain-svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.1));
+        }
+
+        .tool-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, min-minmax(300px, 1fr));
+            gap: 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .tool-card {
+            background: #f9fafb;
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid #e5e7eb;
+            text-align: left;
+            transition: all 0.3s ease;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-8px);
+            border-color: #00f0ff;
+            background: #fff;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+        }
+
+        .tool-icon {
+            width: 50px;
+            height: 50px;
+            background: #111827;
+            color: #fff;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .tool-card h3 { font-size: 22px; margin-bottom: 16px; }
+        .tool-card p { color: #6b7280; line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="NuclearAI.png" alt="Nuclear AI" class="logo-img">
+                <span class="logo-text">Nuclear AI</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="resources.html" class="active">Resources</a>
+                <a href="pricing.html">Pricing</a>
+                <a href="dashboard.html" class="btn-login">Dashboard</a>
+            </div>
+        </nav>
+    </header>
+
+    <section class="resources-hero">
+        <h1 class="reveal" style="font-size: 64px; margin-bottom: 24px;">Our <span class="gradient-text">Resources</span></h1>
+        <p class="reveal" style="color: #6b7280; font-size: 20px; max-width: 700px; margin: 0 auto;">
+            Explore the multi-model intelligence driving our visibility analysis.
+        </p>
+
+        <div class="ai-chat-animation">
+            <!-- OpenAI -->
+            <div class="ai-node openai">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M4.93 19.07L19.07 4.93"/></svg>
+                <div class="chat-bubble" style="animation-delay: 0s;">Analyzing user intent...</div>
+            </div>
+            <!-- Claude -->
+            <div class="ai-node claude">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9 9 9 0 0 0-9-9z"/><path d="M12 8v8M8 12h8"/></svg>
+            </div>
+            <!-- Gemini -->
+            <div class="ai-node gemini">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                <div class="chat-bubble" style="animation: talk 10s linear infinite; animation-delay: 4s;">Synthesizing market trends.</div>
+            </div>
+            <!-- Llama -->
+            <div class="ai-node llama">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M19 8a4 4 0 0 0-2-3.87"/></svg>
+            </div>
+            <!-- Perplexity -->
+            <div class="ai-node perplexity">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            </div>
+        </div>
+    </section>
+
+    <section class="brain-viz-section">
+        <div class="brain-container">
+            <!-- Interconnected Brain SVG -->
+            <svg class="brain-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#111827" d="M100,20 C144,20 180,56 180,100 C180,144 144,180 100,180 C56,180 20,144 20,100 C20,56 56,20 100,20 Z" opacity="0.05"/>
+                <circle cx="100" cy="40" r="10" fill="#00f0ff"/>
+                <circle cx="160" cy="100" r="10" fill="#ef4444"/>
+                <circle cx="100" cy="160" r="10" fill="#8b5cf6"/>
+                <circle cx="40" cy="100" r="10" fill="#f59e0b"/>
+                <line x1="100" y1="40" x2="160" y2="100" stroke="#e5e7eb" stroke-width="1"/>
+                <line x1="160" y1="100" x2="100" y2="160" stroke="#e5e7eb" stroke-width="1"/>
+                <line x1="100" y1="160" x2="40" y2="100" stroke="#e5e7eb" stroke-width="1"/>
+                <line x1="40" y1="100" x2="100" y2="40" stroke="#e5e7eb" stroke-width="1"/>
+                <line x1="100" y1="40" x2="100" y2="160" stroke="#e5e7eb" stroke-width="1"/>
+                <line x1="40" y1="100" x2="160" y2="100" stroke="#e5e7eb" stroke-width="1"/>
+            </svg>
+        </div>
+        
+        <h2 style="font-size: 36px; margin-bottom: 24px;">The <span class="gradient-text">Neural Core</span></h2>
+        <p style="color: #6b7280; font-size: 18px; max-width: 800px; margin: 0 auto 80px; line-height: 1.6;">
+            Our proprietary internal "brain" is formed by the seamless integration of leading AI models. Instead of relying on a single source of truth, Nuclear AI uses collaborative intelligence to analyze your brand's visibility from every possible angle, ensuring cross-platform dominance.
+        </p>
+
+        <div class="tool-card-grid">
+            <div class="tool-card">
+                <div class="tool-icon"><i data-lucide="search"></i></div>
+                <h3>SEO Analysis</h3>
+                <p>We use deep-learning scrapers to identify the exact keywords and search intents pinning your website to the top of Google. Our tools look for missing backlinks and technical errors that hurt your search ranking.</p>
+            </div>
+            <div class="tool-card">
+                <div class="tool-icon"><i data-lucide="globe"></i></div>
+                <h3>GEO Visibility</h3>
+                <p>Generative Engine Optimization (GEO) focuses on AI-powered search engines. We implement specific formatting and factual sourcing patterns that make models like Perplexity and Claude cite YOUR brand as the authority.</p>
+            </div>
+            <div class="tool-card">
+                <div class="tool-icon"><i data-lucide="zap"></i></div>
+                <h3>Quick Implementation</h3>
+                <p>Once causes are identified, our automated agents generate optimized content packages (Prompts, Sources, and Models) that you can push directly to your live environment to instantly improve AI sentiment.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <img src="NuclearAI.png" alt="Nuclear AI" class="logo-img">
+                <span class="logo-text">Nuclear AI</span>
+                <p>The first automated platform for Search and Generative Engine Optimization.</p>
+            </div>
+            <div class="footer-links">
+                <div>
+                    <h4>Product</h4>
+                    <a href="resources.html">Resources</a>
+                    <a href="pricing.html">Pricing</a>
+                    <a href="dashboard.html">Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

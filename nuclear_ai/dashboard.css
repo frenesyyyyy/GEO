@@ -22,6 +22,27 @@ body.dashboard-active {
     box-sizing: border-box;
     overflow-y: auto;
     background: radial-gradient(circle at center, rgba(0, 240, 255, 0.05) 0%, #f9fafb 100%);
+    position: relative;
+}
+
+.btn-back-home {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.btn-back-home:hover {
+    color: #111827;
+    transform: translateX(-4px);
 }
 
 .auth-card {
