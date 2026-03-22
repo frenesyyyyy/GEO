@@ -304,23 +304,11 @@ async function handleSignup(e) {
         errorEl.innerText = error.message;
     } else {
         if (data.session) {
-            // Email confirmation is disabled on Supabase
             handlePostLogin(name + ' ' + surname, email, data.user.id);
         } else {
-            // Email confirmation is required
-            document.getElementById('signup-form').innerHTML = `
-                <div style="text-align: center; padding: 40px 0;">
-                    <i data-lucide="mail-check" style="width: 48px; height: 48px; color: #22c55e; margin-bottom: 16px;"></i>
-                    <h3 style="margin-bottom: 8px;">Check Your Email</h3>
-                    <p style="color: #6b7280; margin-bottom: 16px; font-size: 15px; line-height: 1.5;">We've sent a verification link to <strong>${email}</strong>.<br>Please click the link to activate your account and log in.</p>
-                    <div style="background: #fdfdfd; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; margin-bottom: 24px; font-size: 12px; color: #6b7280; text-align: left;">
-                        <strong>Didn't receive it?</strong> Supabase restricts free tiers to 3 emails per hour. For testing, go to your Supabase Dashboard &rarr; Authentication &rarr; Providers &rarr; Email, and toggle off <strong>"Confirm email"</strong>.
-                    </div>
-                    <button type="button" class="btn-primary" onclick="window.location.reload()" style="width: 100%; justify-content: center;">Reload and Login</button>
-                </div>
-            `;
-            lucide.createIcons();
-
+            // Confirmation might still be required in Supabase settings
+            alert('Account created! If you cannot log in, please check your email to verify your account, or disable "Confirm email" in your Supabase dashboard.');
+            switchAuthMode('login');
         }
     }
 }
