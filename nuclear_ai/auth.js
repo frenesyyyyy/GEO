@@ -1,7 +1,7 @@
 const SUPABASE_URL = 'https://uzubvvmfroozinyqdlbi.supabase.co';
 // PLEASE NOTE: To make real API calls, we need the ANON PUBLIC KEY from Supabase dashboard.
 // Without it, the application runs in a high-fidelity "Mock Mode" for UI demonstration and user flow logic.
-const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY'; 
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6dWJ2dm1mcm9vemlueXFkbGJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDM5OTQsImV4cCI6MjA4OTc3OTk5NH0.f-g9ADbts9WIHyGw9BQF6RZaJKjOJ24cOuPFHv7mMWg'; 
 
 let supabaseClient = null;
 let isMockMode = (SUPABASE_KEY === 'YOUR_SUPABASE_ANON_KEY');
@@ -38,7 +38,7 @@ async function checkSession() {
         } else {
             showAuth();
         }
-    } catch(err) {
+    } catch (err) {
         console.error("Supabase Error:", err);
         showAuth();
     }
@@ -59,7 +59,7 @@ function switchAuthMode(mode) {
     const loginForm = document.getElementById('login-form');
     const signupForm = document.getElementById('signup-form');
     const tabs = document.querySelectorAll('.auth-tab');
-    
+
     // Clear errors when toggling modes
     document.getElementById('login-error').innerText = '';
     document.getElementById('signup-error').innerText = '';
@@ -131,7 +131,7 @@ async function handleSignup(e) {
     const surname = document.getElementById('signup-surname').value;
     const email = document.getElementById('signup-email').value;
     const password = document.getElementById('signup-password').value;
-    
+
     const company = document.getElementById('signup-company').value;
     const location = document.getElementById('signup-location').value;
 
