@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclear AI | Admin Dashboard</title>
+    <!-- Reusing main typography and styles -->
+    <link rel="stylesheet" href="style.css?v=13">
+    <link rel="stylesheet" href="dashboard.css?v=2">
+    <link rel="stylesheet" href="admin.css?v=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="dashboard-body admin-body">
+    <div class="dashboard-layout">
+        <!-- Left Sidebar: Users List -->
+        <aside class="dashboard-sidebar" style="width: 320px; border-right: 1px solid #e5e7eb;">
+            <div class="sidebar-header">
+                <img src="NuclearAI.png" alt="Nuclear AI" class="logo-img" style="width: 32px; height: 32px;">
+                <div class="sidebar-title">Nuclear Admin<br><span style="color: #ef4444;">Superuser Access</span></div>
+            </div>
+
+            <div class="sidebar-search">
+                <i data-lucide="search"></i>
+                <input type="text" id="user-search" placeholder="Search users...">
+            </div>
+
+            <div class="sidebar-nav">
+                <div class="nav-group">Registered Users</div>
+                <ul id="admin-user-list" class="admin-list">
+                    <!-- Users injected here -->
+                </ul>
+            </div>
+            
+            <div class="sidebar-footer">
+                <button onclick="window.location.href='dashboard.html'" class="btn-primary" style="width: 100%; justify-content: center; background: #111827;">Exit Admin</button>
+            </div>
+        </aside>
+
+        <!-- Middle Column: Projects List -->
+        <aside class="dashboard-sidebar" id="admin-projects-col" style="width: 320px; border-right: 1px solid #e5e7eb; display: none;">
+            <div class="sidebar-header">
+                <div class="sidebar-title" style="margin: 0;">User Projects<br><span id="selected-user-email"></span></div>
+            </div>
+            <div class="sidebar-nav">
+                <ul id="admin-project-list" class="admin-list">
+                    <!-- Projects injected here -->
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Area: Project Data Editor -->
+        <main class="dashboard-content" id="admin-editor-area" style="display: none; background: #fff;">
+            <header class="dash-top-bar" style="border-bottom: 1px solid #e5e7eb;">
+                <div class="dash-filters">
+                    <h3 id="editing-project-name" style="margin: 0;">Editing Project</h3>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn-primary" onclick="saveProjectData()"><i data-lucide="save"></i> Save Changes</button>
+                </div>
+            </header>
+
+            <div class="dash-main-area admin-editor-tabs">
+                <!-- Tabs -->
+                <div class="auth-tabs" style="margin-bottom: 24px;">
+                    <button class="auth-tab active" onclick="switchAdminTab('overview')">Overview</button>
+                    <button class="auth-tab" onclick="switchAdminTab('prompts')">Prompts</button>
+                    <button class="auth-tab" onclick="switchAdminTab('sources')">Sources</button>
+                    <button class="auth-tab" onclick="switchAdminTab('models')">Models</button>
+                    <button class="auth-tab" onclick="switchAdminTab('comply')">Comply</button>
+                </div>
+
+                <div class="editor-content-area">
+                    <!-- Overview Tab Editor -->
+                    <div id="tab-overview" class="admin-tab-content">
+                        <h4>Last Update Tick</h4>
+                        <div class="input-group">
+                            <label>Update Message</label>
+                            <input type="text" id="overview-msg" placeholder="e.g. Optimized 15 keywords for LLMs">
+                        </div>
+                        <div class="input-group">
+                            <label>Status Light</label>
+                            <select id="overview-color" class="form-select">
+                                <option value="green">🟢 Green (Good/Completed)</option>
+                                <option value="yellow">🟡 Yellow (In Progress)</option>
+                                <option value="orange">🟠 Orange (Warning/Action Needed)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Prompts Tab Editor -->
+                    <div id="tab-prompts" class="admin-tab-content" style="display: none;">
+                        <h4>Prompts Documentation</h4>
+                        <div class="input-group">
+                            <label>Title</label>
+                            <input type="text" id="prompts-title" placeholder="e.g. Core System Prompt Revision">
+                        </div>
+                        <div class="input-group">
+                            <label>Description</label>
+                            <textarea id="prompts-desc" rows="4" placeholder="Description of the prompt changes..."></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label>Attached Files (Mock Display Names, comma separated)</label>
+                            <input type="text" id="prompts-files" placeholder="e.g. system_prompt_v2.txt, logic_flow.pdf">
+                        </div>
+                    </div>
+
+                    <!-- Sources Tab Editor -->
+                    <div id="tab-sources" class="admin-tab-content" style="display: none;">
+                        <h4>Sources Documentation</h4>
+                        <div class="input-group">
+                            <label>Content</label>
+                            <textarea id="sources-content" rows="8" placeholder="Enter documentation regarding external web tools for better environment..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Models Tab Editor -->
+                    <div id="tab-models" class="admin-tab-content" style="display: none;">
+                        <h4>Models Documentation</h4>
+                        <div class="input-group">
+                            <label>Complete Documentation</label>
+                            <textarea id="models-content" rows="12" placeholder="Complete project documentation..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Comply Tab Editor -->
+                    <div id="tab-comply" class="admin-tab-content" style="display: none;">
+                        <h4>Comply Message</h4>
+                        <div class="input-group">
+                            <label>Message to Team</label>
+                            <textarea id="comply-content" rows="4" placeholder="e.g. We are fully compliant with GDPR regulations..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Empty State when nothing selected -->
+        <main class="dashboard-content" id="admin-empty-area" style="display: flex; align-items: center; justify-content: center; background: #f9fafb;">
+            <div class="empty-state">
+                <div class="empty-icon"><i data-lucide="shield-check"></i></div>
+                <h3>Admin Access</h3>
+                <p>Select a user and a project from the sidebar to begin editing their dashboard data.</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="admin.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

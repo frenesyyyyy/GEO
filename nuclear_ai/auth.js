@@ -44,8 +44,24 @@ async function checkSession() {
     }
 }
 
+function trackUserGlobally(email, name) {
+    if (!email) return;
+    const users = JSON.parse(localStorage.getItem('all_auth_users') || '[]');
+    let user = users.find(u => u.email === email);
+    if (!user) {
+        users.push({ email, name, created_at: new Date().toISOString(), last_login: new Date().toISOString() });
+    } else {
+        user.last_login = new Date().toISOString();
+        if (name) user.name = name;
+    }
+    localStorage.setItem('all_auth_users', JSON.stringify(users));
+}
+
 function handlePostLogin(userName, userEmail) {
-    if (userEmail) localStorage.setItem('currentUserEmail', userEmail);
+    if (userEmail) {
+        localStorage.setItem('currentUserEmail', userEmail);
+        trackUserGlobally(userEmail, userName);
+    }
     const pendingPlan = localStorage.getItem('pending_plan');
     if (pendingPlan) {
         showPayment(userName, pendingPlan);
@@ -100,6 +116,7 @@ function renderProjects() {
         projects.forEach(p => {
             const card = document.createElement('div');
             card.className = 'project-card';
+            card.onclick = () => openProjectDetail(p);
             card.innerHTML = `
                 <div class="project-info">
                     <div class="project-icon"><i data-lucide="layout"></i></div>
@@ -292,4 +309,91 @@ function handleModalSelect(planId) {
     closePlanModal();
     const mockUser = JSON.parse(localStorage.getItem('mockUser') || '{"name": "User"}');
     showPayment(mockUser.name, planId);
+}
+
+// Project Detail View Management
+let currentOpenProject = null;
+
+function openProjectDetail(project) {
+    currentOpenProject = project;
+    
+    document.getElementById('empty-state').style.display = 'none';
+    document.getElementById('projects-list').style.display = 'none';
+    document.getElementById('project-detail-area').style.display = 'block';
+    
+    document.getElementById('detail-project-name').innerText = project.name;
+    document.getElementById('detail-project-plan').innerText = project.plan;
+    
+    loadProjectDetailData(project.id);
+    switchDashboardTab('overview');
+}
+
+function closeProjectDetail() {
+    currentOpenProject = null;
+    document.getElementById('project-detail-area').style.display = 'none';
+    renderProjects();
+}
+
+function switchDashboardTab(tabName) {
+    if (!currentOpenProject) return;
+
+    // Update active nav link
+    document.querySelectorAll('.sidebar-nav li').forEach(el => el.classList.remove('active'));
+    const navEl = document.getElementById('nav-' + tabName);
+    if(navEl) navEl.classList.add('active');
+
+    // Show correct section
+    const sections = document.querySelectorAll('.detail-content-section');
+    sections.forEach(s => s.style.display = 'none');
+    
+    const sectionEl = document.getElementById('detail-' + tabName);
+    if(sectionEl) sectionEl.style.display = 'block';
+}
+
+function loadProjectDetailData(projectId) {
+    const dataKey = `project_data_${projectId}`;
+    const data = JSON.parse(localStorage.getItem(dataKey) || '{}');
+
+    // Overview
+    if (data.overview && data.overview.msg) {
+        document.getElementById('overview-msg-display').innerText = data.overview.msg;
+        document.getElementById('overview-time-display').innerText = new Date(data.overview.timestamp).toLocaleString();
+        const light = document.querySelector('#overview-update-box .status-light');
+        light.className = `status-light ${data.overview.color}`;
+    }
+
+    // Prompts
+    if (data.prompts && data.prompts.title) {
+        document.getElementById('prompts-title-display').innerText = data.prompts.title;
+        document.getElementById('prompts-desc-display').innerText = data.prompts.desc;
+        
+        const filesContainer = document.getElementById('prompts-files-display');
+        filesContainer.innerHTML = '';
+        if (data.prompts.files && data.prompts.files.length > 0) {
+            data.prompts.files.forEach(f => {
+                const fdiv = document.createElement('div');
+                fdiv.className = 'file-record';
+                fdiv.innerHTML = `<i data-lucide="file-text"></i> ${f}`;
+                filesContainer.appendChild(fdiv);
+            });
+            lucide.createIcons();
+        }
+    }
+
+    // Sources
+    if (data.sources && data.sources.content) {
+        document.getElementById('sources-content-display').innerText = data.sources.content;
+        document.getElementById('sources-content-display').style.color = '#111827';
+    }
+
+    // Models
+    if (data.models && data.models.content) {
+        document.getElementById('models-content-display').innerText = data.models.content;
+        document.getElementById('models-content-display').style.color = '#111827';
+    }
+
+    // Comply
+    if (data.comply && data.comply.content) {
+        document.getElementById('comply-content-display').innerText = data.comply.content;
+    }
 }

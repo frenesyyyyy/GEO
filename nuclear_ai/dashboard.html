@@ -129,12 +129,12 @@
             <div class="sidebar-nav">
                 <div class="nav-group">Pages</div>
                 <ul>
-                    <li class="active"><a href="#"><i data-lucide="home"></i> Overview</a></li>
-                    <li><a href="#"><i data-lucide="terminal-square"></i> Prompts</a></li>
-                    <li><a href="#"><i data-lucide="database"></i> Sources</a></li>
-                    <li><a href="#"><i data-lucide="box"></i> Models</a></li>
-                    <li><a href="#"><i data-lucide="settings"></i> Settings</a></li>
-                    <li><a href="#"><i data-lucide="shield-check"></i> Comply</a></li>
+                    <li class="active" id="nav-overview" onclick="switchDashboardTab('overview')"><a href="#"><i data-lucide="home"></i> Overview</a></li>
+                    <li id="nav-prompts" onclick="switchDashboardTab('prompts')"><a href="#"><i data-lucide="terminal-square"></i> Prompts</a></li>
+                    <li id="nav-sources" onclick="switchDashboardTab('sources')"><a href="#"><i data-lucide="database"></i> Sources</a></li>
+                    <li id="nav-models" onclick="switchDashboardTab('models')"><a href="#"><i data-lucide="box"></i> Models</a></li>
+                    <li id="nav-settings" onclick="switchDashboardTab('settings')"><a href="#"><i data-lucide="settings"></i> Settings</a></li>
+                    <li id="nav-comply" onclick="switchDashboardTab('comply')"><a href="#"><i data-lucide="shield-check"></i> Comply</a></li>
                 </ul>
             </div>
             
@@ -166,6 +166,64 @@
                     <h3>No Projects Started Yet</h3>
                     <p>Connect your first data source or set up a prompt to begin tracking your Nuclear AI visibility and positioning metrics.</p>
                     <button class="btn-primary" onclick="openPlanModal()"><i data-lucide="plus"></i> Create Project</button>
+                </div>
+
+                <!-- Project Detail Area (Initially Hidden) -->
+                <div id="project-detail-area" style="display: none;">
+                    <button class="btn-back" onclick="closeProjectDetail()"><i data-lucide="arrow-left"></i> Back to Projects</button>
+                    
+                    <div class="project-header" style="margin-top: 16px; margin-bottom: 32px;">
+                        <h2 id="detail-project-name" style="margin: 0;">Project Name</h2>
+                        <span id="detail-project-plan" class="badge">Plan</span>
+                    </div>
+
+                    <!-- Detail Tabs Content -->
+                    <div id="detail-overview" class="detail-content-section">
+                        <div class="content-card">
+                            <h3>Project Updates</h3>
+                            <div id="overview-update-box" class="update-box">
+                                <span class="status-light green"></span>
+                                <span id="overview-msg-display" style="font-size: 14px; font-weight: 500;">No recent updates.</span>
+                                <span id="overview-time-display" style="color: #6b7280; font-size: 12px; margin-left: auto;"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="detail-prompts" class="detail-content-section" style="display: none;">
+                        <div class="content-card">
+                            <h3 id="prompts-title-display">No Prompts Documentation</h3>
+                            <p id="prompts-desc-display" style="color: #6b7280;">Code documentation for the website will appear here.</p>
+                            <div id="prompts-files-display" class="files-container" style="margin-top: 24px;"></div>
+                        </div>
+                    </div>
+
+                    <div id="detail-sources" class="detail-content-section" style="display: none;">
+                        <div class="content-card">
+                            <h3>Sources Documentation</h3>
+                            <p id="sources-content-display" class="markdown-preview" style="color: #6b7280;">No sources documentation provided yet.</p>
+                        </div>
+                    </div>
+
+                    <div id="detail-models" class="detail-content-section" style="display: none;">
+                        <div class="content-card">
+                            <h3>Models Documentation</h3>
+                            <p id="models-content-display" class="markdown-preview" style="color: #6b7280;">Complete project documentation will appear here when updated.</p>
+                        </div>
+                    </div>
+                    
+                    <div id="detail-settings" class="detail-content-section" style="display: none;">
+                        <div class="content-card">
+                            <h3>Project Settings</h3>
+                            <p style="color: #6b7280;">Project settings and configuration options.</p>
+                        </div>
+                    </div>
+
+                    <div id="detail-comply" class="detail-content-section" style="display: none;">
+                        <div class="content-card message-card highlight">
+                            <h3>Compliance Status</h3>
+                            <p id="comply-content-display" style="font-weight: 500;">Awaiting compliance review from the Nuclear AI team.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
