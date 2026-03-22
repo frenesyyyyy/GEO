@@ -9,6 +9,7 @@ if (!isMockMode && window.supabase) {
 
 let currentSelectedEmail = null;
 let currentSelectedProjectId = null;
+let currentProjectData = null; // Stores all arrays from the active project
 
 window.addEventListener('DOMContentLoaded', () => {
     loadUsers();
@@ -109,85 +110,141 @@ function switchAdminTab(tabName) {
 }
 
 async function loadProjectData(projectId) {
-    let data = {};
+    let data = { overview: [], prompts: [], sources: [], models: [], comply: [] };
     if (isMockMode) {
         const dataKey = `project_data_${projectId}`;
-        data = JSON.parse(localStorage.getItem(dataKey) || '{}');
+        const saved = JSON.parse(localStorage.getItem(dataKey) || '{}');
+        // Ensure all are arrays
+        data.overview = Array.isArray(saved.overview) ? saved.overview : (saved.overview ? [saved.overview] : []);
+        data.prompts = Array.isArray(saved.prompts) ? saved.prompts : (saved.prompts ? [saved.prompts] : []);
+        data.sources = Array.isArray(saved.sources) ? saved.sources : (saved.sources ? [saved.sources] : []);
+        data.models = Array.isArray(saved.models) ? saved.models : (saved.models ? [saved.models] : []);
+        data.comply = Array.isArray(saved.comply) ? saved.comply : (saved.comply ? [saved.comply] : []);
     } else {
         const { data: row, error } = await supabaseClient.from('projects').select('overview, prompts, sources, models, comply').eq('id', projectId).single();
         if (!error && row) {
-            data = {
-                overview: row.overview || {},
-                prompts: row.prompts || {},
-                sources: row.sources || {},
-                models: row.models || {},
-                comply: row.comply || {}
-            };
+            data.overview = Array.isArray(row.overview) ? row.overview : [];
+            data.prompts = Array.isArray(row.prompts) ? row.prompts : [];
+            data.sources = Array.isArray(row.sources) ? row.sources : [];
+            data.models = Array.isArray(row.models) ? row.models : [];
+            data.comply = Array.isArray(row.comply) ? row.comply : [];
         }
     }
     
-    document.getElementById('overview-msg').value = data.overview?.msg || '';
-    document.getElementById('overview-color').value = data.overview?.color || 'green';
+    currentProjectData = data;
+    renderHistoryAll();
     
-    document.getElementById('prompts-title').value = data.prompts?.title || '';
-    document.getElementById('prompts-desc').value = data.prompts?.desc || '';
-    document.getElementById('prompts-files').value = (data.prompts?.files || []).join(', ');
+    // Clear forms for new entry
+    document.querySelectorAll('.admin-tab-content input, .admin-tab-content textarea').forEach(el => el.value = '');
+    document.getElementById('overview-color').value = 'green';
+}
+
+function renderHistoryAll() {
+    renderTabHistory('overview');
+    renderTabHistory('prompts');
+    renderTabHistory('sources');
+    renderTabHistory('models');
+    renderTabHistory('comply');
+}
+
+function renderTabHistory(tab) {
+    const list = document.getElementById(`history-${tab}`);
+    if (!list) return;
+    list.innerHTML = '';
     
-    document.getElementById('sources-content').value = data.sources?.content || '';
-    document.getElementById('models-content').value = data.models?.content || '';
-    document.getElementById('comply-content').value = data.comply?.content || '';
+    const items = currentProjectData[tab] || [];
+    if (items.length === 0) {
+        list.innerHTML = '<div style="color: #6b7280; font-size: 12px; padding: 10px;">No history yet.</div>';
+        return;
+    }
+
+    // Sort by newest first
+    const sorted = [...items].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    sorted.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        let preview = '';
+        if (tab === 'overview') preview = item.msg;
+        else if (tab === 'prompts') preview = item.title;
+        else preview = (item.content || '').substring(0, 40) + '...';
+
+        div.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <span style="font-weight: 600; font-size: 13px;">${new Date(item.timestamp).toLocaleDateString()}</span>
+                <button onclick="deleteEntry('${tab}', '${item.timestamp}')" class="btn-delete-small"><i data-lucide="trash-2"></i></button>
+            </div>
+            <div style="font-size: 12px; color: #4b5563; margin-top: 4px;">${preview}</div>
+        `;
+        list.appendChild(div);
+    });
+    lucide.createIcons();
 }
 
 async function saveProjectData() {
-    if (!currentSelectedProjectId) return;
+    if (!currentSelectedProjectId || !currentProjectData) return;
     
-    const filesInput = document.getElementById('prompts-files').value;
-    const filesArray = filesInput ? filesInput.split(',').map(s => s.trim()).filter(s => s) : [];
+    const activeTab = document.querySelector('.auth-tab.active').innerText.toLowerCase();
+    let newItem = { timestamp: new Date().toISOString() };
 
-    const data = {
-        overview: {
-            msg: document.getElementById('overview-msg').value,
-            color: document.getElementById('overview-color').value,
-            timestamp: new Date().toISOString()
-        },
-        prompts: {
-            title: document.getElementById('prompts-title').value,
-            desc: document.getElementById('prompts-desc').value,
-            files: filesArray,
-            timestamp: new Date().toISOString()
-        },
-        sources: {
-            content: document.getElementById('sources-content').value,
-            timestamp: new Date().toISOString()
-        },
-        models: {
-            content: document.getElementById('models-content').value,
-            timestamp: new Date().toISOString()
-        },
-        comply: {
-            content: document.getElementById('comply-content').value,
-            timestamp: new Date().toISOString()
-        }
-    };
+    if (activeTab === 'overview') {
+        const msg = document.getElementById('overview-msg').value;
+        if(!msg) return alert("Message is required");
+        newItem.msg = msg;
+        newItem.color = document.getElementById('overview-color').value;
+    } else if (activeTab === 'prompts') {
+        const title = document.getElementById('prompts-title').value;
+        if(!title) return alert("Title is required");
+        newItem.title = title;
+        newItem.desc = document.getElementById('prompts-desc').value;
+        const filesInput = document.getElementById('prompts-files').value;
+        newItem.files = filesInput ? filesInput.split(',').map(s => {
+            const name = s.trim();
+            const ext = name.split('.').pop().toLowerCase();
+            return { name, type: ext };
+        }).filter(f => f.name) : [];
+    } else {
+        const content = document.getElementById(`${activeTab}-content`).value;
+        if(!content) return alert("Content is required");
+        newItem.content = content;
+    }
+
+    // Append to existing array
+    currentProjectData[activeTab].push(newItem);
     
     if (isMockMode) {
-        const dataKey = `project_data_${currentSelectedProjectId}`;
-        localStorage.setItem(dataKey, JSON.stringify(data));
-        alert('Project data saved successfully (Mock Mode)!');
+        localStorage.setItem(`project_data_${currentSelectedProjectId}`, JSON.stringify(currentProjectData));
+        alert('Package appended successfully (Mock Mode)!');
+        loadProjectData(currentSelectedProjectId);
     } else {
-        const { error } = await supabaseClient.from('projects').update({
-            overview: data.overview,
-            prompts: data.prompts,
-            sources: data.sources,
-            models: data.models,
-            comply: data.comply
-        }).eq('id', currentSelectedProjectId);
+        const updateData = {};
+        updateData[activeTab] = currentProjectData[activeTab];
+
+        const { error } = await supabaseClient.from('projects').update(updateData).eq('id', currentSelectedProjectId);
         
         if (error) {
             console.error('Error updating project:', error);
-            alert('Failed to save data. See console for details.');
+            alert('Failed to save data.');
         } else {
-            alert('Project data saved successfully to Database!');
+            alert('New package added successfully!');
+            loadProjectData(currentSelectedProjectId);
         }
+    }
+}
+
+async function deleteEntry(tab, timestamp) {
+    if (!confirm("Are you sure you want to delete this historical entry?")) return;
+    
+    currentProjectData[tab] = currentProjectData[tab].filter(i => i.timestamp !== timestamp);
+    
+    if (isMockMode) {
+        localStorage.setItem(`project_data_${currentSelectedProjectId}`, JSON.stringify(currentProjectData));
+        renderHistoryAll();
+    } else {
+        const updateData = {};
+        updateData[tab] = currentProjectData[tab];
+        const { error } = await supabaseClient.from('projects').update(updateData).eq('id', currentSelectedProjectId);
+        if (error) alert("Error deleting entry");
+        else renderHistoryAll();
     }
 }

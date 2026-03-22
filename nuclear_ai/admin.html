@@ -76,62 +76,84 @@
                 <div class="editor-content-area">
                     <!-- Overview Tab Editor -->
                     <div id="tab-overview" class="admin-tab-content">
-                        <h4>Last Update Tick</h4>
-                        <div class="input-group">
-                            <label>Update Message</label>
-                            <input type="text" id="overview-msg" placeholder="e.g. Optimized 15 keywords for LLMs">
-                        </div>
-                        <div class="input-group">
-                            <label>Status Light</label>
-                            <select id="overview-color" class="form-select">
-                                <option value="green">🟢 Green (Good/Completed)</option>
-                                <option value="yellow">🟡 Yellow (In Progress)</option>
-                                <option value="orange">🟠 Orange (Warning/Action Needed)</option>
-                            </select>
+                        <div class="admin-editor-grid">
+                            <div class="admin-form-col">
+                                <label class="form-label">Update Message</label>
+                                <textarea id="overview-msg" class="admin-textarea" placeholder="What's the latest update?"></textarea>
+                                
+                                <label class="form-label" style="margin-top: 16px;">Status Light</label>
+                                <select id="overview-color" class="admin-input">
+                                    <option value="green">Green (Healthy)</option>
+                                    <option value="yellow">Yellow (Progressing)</option>
+                                    <option value="orange">Orange (Action Required)</option>
+                                </select>
+                            </div>
+                            <div class="admin-history-col">
+                                <label class="form-label">Previous Updates</label>
+                                <div id="history-overview" class="history-list"></div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Prompts Tab Editor -->
                     <div id="tab-prompts" class="admin-tab-content" style="display: none;">
-                        <h4>Prompts Documentation</h4>
-                        <div class="input-group">
-                            <label>Title</label>
-                            <input type="text" id="prompts-title" placeholder="e.g. Core System Prompt Revision">
-                        </div>
-                        <div class="input-group">
-                            <label>Description</label>
-                            <textarea id="prompts-desc" rows="4" placeholder="Description of the prompt changes..."></textarea>
-                        </div>
-                        <div class="input-group">
-                            <label>Attached Files (Mock Display Names, comma separated)</label>
-                            <input type="text" id="prompts-files" placeholder="e.g. system_prompt_v2.txt, logic_flow.pdf">
+                        <div class="admin-editor-grid">
+                            <div class="admin-form-col">
+                                <label class="form-label">Package Title</label>
+                                <input type="text" id="prompts-title" class="admin-input" placeholder="e.g., V1 Core Prompts">
+                                
+                                <label class="form-label" style="margin-top: 16px;">Description</label>
+                                <textarea id="prompts-desc" class="admin-textarea" placeholder="Detailed documentation..."></textarea>
+                                
+                                <label class="form-label" style="margin-top: 16px;">Attach Files (comma separated names)</label>
+                                <input type="text" id="prompts-files" class="admin-input" placeholder="index.js, styles.css, README.md">
+                            </div>
+                            <div class="admin-history-col">
+                                <label class="form-label">Existing Packages</label>
+                                <div id="history-prompts" class="history-list"></div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Sources Tab Editor -->
                     <div id="tab-sources" class="admin-tab-content" style="display: none;">
-                        <h4>Sources Documentation</h4>
-                        <div class="input-group">
-                            <label>Content</label>
-                            <textarea id="sources-content" rows="8" placeholder="Enter documentation regarding external web tools for better environment..."></textarea>
+                        <div class="admin-editor-grid">
+                            <div class="admin-form-col">
+                                <label class="form-label">Sources Documentation</label>
+                                <textarea id="sources-content" class="admin-textarea" style="height: 200px;" placeholder="Paste tool documentation here..."></textarea>
+                            </div>
+                            <div class="admin-history-col">
+                                <label class="form-label">History</label>
+                                <div id="history-sources" class="history-list"></div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Models Tab Editor -->
                     <div id="tab-models" class="admin-tab-content" style="display: none;">
-                        <h4>Models Documentation</h4>
-                        <div class="input-group">
-                            <label>Complete Documentation</label>
-                            <textarea id="models-content" rows="12" placeholder="Complete project documentation..."></textarea>
+                        <div class="admin-editor-grid">
+                            <div class="admin-form-col">
+                                <label class="form-label">Project Model Details</label>
+                                <textarea id="models-content" class="admin-textarea" style="height: 200px;" placeholder="Full project architecture details..."></textarea>
+                            </div>
+                            <div class="admin-history-col">
+                                <label class="form-label">History</label>
+                                <div id="history-models" class="history-list"></div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Comply Tab Editor -->
                     <div id="tab-comply" class="admin-tab-content" style="display: none;">
-                        <h4>Comply Message</h4>
-                        <div class="input-group">
-                            <label>Message to Team</label>
-                            <textarea id="comply-content" rows="4" placeholder="e.g. We are fully compliant with GDPR regulations..."></textarea>
+                        <div class="admin-editor-grid">
+                            <div class="admin-form-col">
+                                <label class="form-label">Message to Team</label>
+                                <textarea id="comply-content" class="admin-textarea" style="height: 200px;" placeholder="Compliance notes or team messages..."></textarea>
+                            </div>
+                            <div class="admin-history-col">
+                                <label class="form-label">Sent Messages</label>
+                                <div id="history-comply" class="history-list"></div>
+                            </div>
                         </div>
                     </div>
                 </div>

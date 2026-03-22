@@ -58,17 +58,76 @@
 }
 
 /* Form Elements */
-.admin-editor-tabs textarea {
+.admin-editor-t.admin-textarea {
     width: 100%;
+    min-height: 120px;
     padding: 12px;
-    border-radius: 8px;
     border: 1px solid #e5e7eb;
-    background: #fdfdfd;
+    border-radius: 8px;
     font-family: inherit;
     font-size: 14px;
     resize: vertical;
 }
 
+/* New Grid Layouts */
+.admin-editor-grid {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 32px;
+}
+
+.admin-history-col {
+    border-left: 1px solid #f3f4f6;
+    padding-left: 24px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.history-item {
+    background: #f9fafb;
+    border: 1px solid #f3f4f6;
+    border-radius: 8px;
+    padding: 12px;
+    transition: all 0.2s;
+}
+
+.history-item:hover {
+    border-color: #e5e7eb;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.btn-delete-small {
+    background: transparent;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-delete-small:hover {
+    color: #ef4444;
+    background: #fee2e2;
+}
+
+.form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+}
 .admin-editor-tabs textarea:focus {
     outline: none;
     border-color: #00f0ff;

@@ -391,12 +391,17 @@ function switchDashboardTab(tabName) {
 }
 
 async function loadProjectDetailData(projectId) {
-    let data = {};
+    let data = { overview: [], prompts: [], sources: [], models: [], comply: [] };
     const userId = localStorage.getItem('currentUserId');
     
     if (isMockMode || !userId) {
         const dataKey = `project_data_${projectId}`;
-        data = JSON.parse(localStorage.getItem(dataKey) || '{}');
+        const saved = JSON.parse(localStorage.getItem(dataKey) || '{}');
+        data.overview = Array.isArray(saved.overview) ? saved.overview : (saved.overview ? [saved.overview] : []);
+        data.prompts = Array.isArray(saved.prompts) ? saved.prompts : (saved.prompts ? [saved.prompts] : []);
+        data.sources = Array.isArray(saved.sources) ? saved.sources : (saved.sources ? [saved.sources] : []);
+        data.models = Array.isArray(saved.models) ? saved.models : (saved.models ? [saved.models] : []);
+        data.comply = Array.isArray(saved.comply) ? saved.comply : (saved.comply ? [saved.comply] : []);
     } else {
         const { data: rowData, error } = await supabaseClient
             .from('projects')
@@ -405,68 +410,115 @@ async function loadProjectDetailData(projectId) {
             .single();
             
         if (!error && rowData) {
-            data = {
-                overview: rowData.overview || {},
-                prompts: rowData.prompts || {},
-                sources: rowData.sources || {},
-                models: rowData.models || {},
-                comply: rowData.comply || {}
-            };
+            data.overview = Array.isArray(rowData.overview) ? rowData.overview : [];
+            data.prompts = Array.isArray(rowData.prompts) ? rowData.prompts : [];
+            data.sources = Array.isArray(rowData.sources) ? rowData.sources : [];
+            data.models = Array.isArray(rowData.models) ? rowData.models : [];
+            data.comply = Array.isArray(rowData.comply) ? rowData.comply : [];
         }
     }
 
-    // Default resets
-    document.getElementById('overview-msg-display').innerText = 'No recent updates.';
-    document.getElementById('overview-time-display').innerText = '';
-    document.querySelector('#overview-update-box .status-light').className = 'status-light';
+    // Sort all arrays by timestamp newest first
+    const sortByTime = (arr) => [...arr].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
     
-    document.getElementById('prompts-title-display').innerText = 'No Prompts Documentation';
-    document.getElementById('prompts-desc-display').innerText = 'Code documentation for the website will appear here.';
-    document.getElementById('prompts-files-display').innerHTML = '';
-    
-    document.getElementById('sources-content-display').innerText = 'No sources documentation provided yet.';
-    document.getElementById('models-content-display').innerText = 'Complete project documentation will appear here when updated.';
-    document.getElementById('comply-content-display').innerText = 'Awaiting compliance review from the Nuclear AI team.';
-
-    // Overview
-    if (data.overview && data.overview.msg) {
-        document.getElementById('overview-msg-display').innerText = data.overview.msg;
-        if(data.overview.timestamp) document.getElementById('overview-time-display').innerText = new Date(data.overview.timestamp).toLocaleString();
-        const light = document.querySelector('#overview-update-box .status-light');
-        light.className = `status-light ${data.overview.color || 'green'}`;
+    // 1. Overview Timeline
+    const overviewContainer = document.getElementById('overview-msg-display').parentElement;
+    overviewContainer.innerHTML = '';
+    const sortedOverview = sortByTime(data.overview);
+    if (sortedOverview.length === 0) {
+        overviewContainer.innerHTML = '<div class="empty-package">No updates yet.</div>';
+    } else {
+        sortedOverview.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'update-timeline-item';
+            div.innerHTML = `
+                <div class="status-light ${item.color || 'green'}"></div>
+                <div class="update-content">
+                    <p class="update-msg">${item.msg}</p>
+                    <span class="update-time">${new Date(item.timestamp).toLocaleString()}</span>
+                </div>
+            `;
+            overviewContainer.appendChild(div);
+        });
     }
 
-    // Prompts
-    if (data.prompts && data.prompts.title) {
-        document.getElementById('prompts-title-display').innerText = data.prompts.title;
-        document.getElementById('prompts-desc-display').innerText = data.prompts.desc || '';
-        
-        const filesContainer = document.getElementById('prompts-files-display');
-        if (data.prompts.files && data.prompts.files.length > 0) {
-            data.prompts.files.forEach(f => {
-                const fdiv = document.createElement('div');
-                fdiv.className = 'file-record';
-                fdiv.innerHTML = `<i data-lucide="file-text"></i> ${f}`;
-                filesContainer.appendChild(fdiv);
-            });
-            lucide.createIcons();
-        }
+    // 2. Prompts Packages
+    const promptsContainer = document.getElementById('prompts-files-display').parentElement;
+    promptsContainer.innerHTML = ''; 
+    const sortedPrompts = sortByTime(data.prompts);
+    if (sortedPrompts.length === 0) {
+        promptsContainer.innerHTML = '<div class="empty-package">No documentation packages yet.</div>';
+    } else {
+        sortedPrompts.forEach(pkg => {
+            const card = document.createElement('div');
+            card.className = 'package-card';
+            
+            let filesHtml = '';
+            if (pkg.files && pkg.files.length > 0) {
+                filesHtml = '<div class="package-files">';
+                pkg.files.forEach(f => {
+                    const icon = getFileIcon(f.type);
+                    filesHtml += `<div class="file-badge"><i data-lucide="${icon}"></i> ${f.name}</div>`;
+                });
+                filesHtml += '</div>';
+            }
+
+            card.innerHTML = `
+                <div class="package-header">
+                    <h4 class="package-title">${pkg.title}</h4>
+                    <span class="package-date">${new Date(pkg.timestamp).toLocaleDateString()}</span>
+                </div>
+                <p class="package-desc">${pkg.desc || ''}</p>
+                ${filesHtml}
+            `;
+            promptsContainer.appendChild(card);
+        });
     }
 
-    // Sources
-    if (data.sources && data.sources.content) {
-        document.getElementById('sources-content-display').innerText = data.sources.content;
-        document.getElementById('sources-content-display').style.color = '#111827';
-    }
+    // 3. Simple Text Blocks (Sources, Models, Comply)
+    renderSimplePackages('sources', data.sources);
+    renderSimplePackages('models', data.models);
+    renderSimplePackages('comply', data.comply);
 
-    // Models
-    if (data.models && data.models.content) {
-        document.getElementById('models-content-display').innerText = data.models.content;
-        document.getElementById('models-content-display').style.color = '#111827';
-    }
-
-    // Comply
-    if (data.comply && data.comply.content) {
-        document.getElementById('comply-content-display').innerText = data.comply.content;
-    }
+    lucide.createIcons();
 }
+
+function renderSimplePackages(tabId, items) {
+    const container = document.getElementById(`${tabId}-content-display`).parentElement;
+    container.innerHTML = '';
+    const sorted = [...items].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    if (sorted.length === 0) {
+        container.innerHTML = `<div class="empty-package">No ${tabId} data uploaded yet.</div>`;
+        return;
+    }
+
+    sorted.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'package-card simple-text';
+        div.innerHTML = `
+            <div class="package-header">
+                <span class="package-date">${new Date(item.timestamp).toLocaleString()}</span>
+            </div>
+            <div class="package-body">${item.content}</div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function getFileIcon(type) {
+    const map = {
+        'pdf': 'file-text',
+        'xlsx': 'file-spreadsheet',
+        'xls': 'file-spreadsheet',
+        'excel': 'file-spreadsheet',
+        'jpg': 'image',
+        'png': 'image',
+        'jpeg': 'image',
+        'docx': 'file-text',
+        'doc': 'file-text',
+        'txt': 'file-text'
+    };
+    return map[type] || 'file';
+}
+
