@@ -1,4 +1,16 @@
 /* Admin Specific Styles */
+.admin-body .dashboard-sidebar {
+    width: 220px !important;
+    transition: width 0.3s;
+}
+
+.admin-body .dash-main-area {
+    display: block !important; /* Override center alignment */
+    padding: 60px !important;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
 .admin-body .sidebar-nav .nav-group {
     margin-top: 24px;
     margin-bottom: 12px;
@@ -63,6 +75,19 @@
     box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.1);
 }
 
+.admin-tab-content {
+    width: 100%;
+    max-width: 800px;
+    animation: fadeIn 0.3s ease;
+}
+
+.admin-tab-content h4 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-size: 18px;
+    color: #111827;
+}
+
 .form-select {
     width: 100%;
     padding: 12px;
@@ -71,10 +96,6 @@
     background: #fdfdfd;
     font-family: inherit;
     font-size: 14px;
-}
-
-.admin-tab-content {
-    animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {

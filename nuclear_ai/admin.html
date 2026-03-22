@@ -16,7 +16,7 @@
 <body class="dashboard-body admin-body">
     <div class="dashboard-layout">
         <!-- Left Sidebar: Users List -->
-        <aside class="dashboard-sidebar" style="width: 320px; border-right: 1px solid #e5e7eb;">
+        <aside class="dashboard-sidebar" style="border-right: 1px solid #e5e7eb; flex-shrink: 0;">
             <div class="sidebar-header">
                 <img src="NuclearAI.png" alt="Nuclear AI" class="logo-img" style="width: 32px; height: 32px;">
                 <div class="sidebar-title">Nuclear Admin<br><span style="color: #ef4444;">Superuser Access</span></div>
@@ -40,7 +40,7 @@
         </aside>
 
         <!-- Middle Column: Projects List -->
-        <aside class="dashboard-sidebar" id="admin-projects-col" style="width: 320px; border-right: 1px solid #e5e7eb; display: none;">
+        <aside class="dashboard-sidebar" id="admin-projects-col" style="border-right: 1px solid #e5e7eb; display: none; flex-shrink: 0;">
             <div class="sidebar-header">
                 <div class="sidebar-title" style="margin: 0;">User Projects<br><span id="selected-user-email"></span></div>
             </div>
@@ -62,9 +62,9 @@
                 </div>
             </header>
 
-            <div class="dash-main-area admin-editor-tabs">
+            <div class="dash-main-area admin-editor-tabs" style="padding: 40px; max-width: 900px;">
                 <!-- Tabs -->
-                <div class="auth-tabs" style="margin-bottom: 24px;">
+                <div class="auth-tabs" style="margin-bottom: 32px; display: flex; gap: 8px;">
                     <button class="auth-tab active" onclick="switchAdminTab('overview')">Overview</button>
                     <button class="auth-tab" onclick="switchAdminTab('prompts')">Prompts</button>
                     <button class="auth-tab" onclick="switchAdminTab('sources')">Sources</button>
