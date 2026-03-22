@@ -122,11 +122,6 @@
                 <div class="sidebar-title">Nuclear AI's Dashboard<br><span id="user-display-name"></span></div>
             </div>
 
-            <div class="sidebar-search">
-                <i data-lucide="search"></i>
-                <input type="text" placeholder="Quick Actions">
-            </div>
-
             <button class="btn-primary" style="width: 100%; margin-bottom: 24px; justify-content: center; background: #111827; border-radius: 10px;" onclick="openPlanModal()">
                 <i data-lucide="plus" style="width: 18px;"></i> New Project
             </button>
@@ -180,9 +175,16 @@
     <div id="plan-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Select a Plan for your Project</h2>
+                <h2>Create Your Project</h2>
                 <button class="close-modal" onclick="closePlanModal()">&times;</button>
             </div>
+            
+            <div class="input-group" style="margin-bottom: 24px;">
+                <label>Project Name</label>
+                <input type="text" id="project-name-input" placeholder="e.g. My Website SEO" required>
+            </div>
+
+            <div class="nav-group" style="margin-bottom: 12px;">Step 2: Select a Plan</div>
             <div class="plan-options">
                 <div class="plan-option" onclick="handleModalSelect('standard')">
                     <div class="plan-info">

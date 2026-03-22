@@ -34,7 +34,7 @@ async function checkSession() {
     try {
         const { data: { session }, error } = await supabaseClient.auth.getSession();
         if (session) {
-            handlePostLogin(session.user.user_metadata?.first_name || session.user.email.split('@')[0]);
+            handlePostLogin(session.user.user_metadata?.first_name || session.user.email.split('@')[0], session.user.email);
         } else {
             showAuth();
         }
@@ -44,7 +44,8 @@ async function checkSession() {
     }
 }
 
-function handlePostLogin(userName) {
+function handlePostLogin(userName, userEmail) {
+    if (userEmail) localStorage.setItem('currentUserEmail', userEmail);
     const pendingPlan = localStorage.getItem('pending_plan');
     if (pendingPlan) {
         showPayment(userName, pendingPlan);
@@ -83,7 +84,8 @@ function showDashboard(userName) {
 }
 
 function renderProjects() {
-    const projects = JSON.parse(localStorage.getItem('user_projects') || '[]');
+    const email = localStorage.getItem('currentUserEmail') || 'guest';
+    const projects = JSON.parse(localStorage.getItem(`projects_${email}`) || '[]');
     const mainArea = document.querySelector('.dash-main-area');
     
     if (projects.length === 0) {
@@ -119,21 +121,26 @@ function renderProjects() {
 
 function finalizePayment() {
     const planId = localStorage.getItem('pending_plan');
-    const mockUser = JSON.parse(localStorage.getItem('mockUser') || '{"name": "User"}');
+    const projectName = localStorage.getItem('pending_project_name') || 'New Project';
+    const mockUser = JSON.parse(localStorage.getItem('mockUser') || '{"name": "User", "email": "guest"}');
+    const email = localStorage.getItem('currentUserEmail') || mockUser.email;
     
     // Simulate payment success
     const newProject = {
         id: Date.now(),
-        name: 'New Project ' + (JSON.parse(localStorage.getItem('user_projects') || '[]').length + 1),
+        name: projectName,
         plan: planId || 'standard',
         status: 'active',
         created_at: new Date().toISOString()
     };
     
-    const projects = JSON.parse(localStorage.getItem('user_projects') || '[]');
+    const projectKey = `projects_${email}`;
+    const projects = JSON.parse(localStorage.getItem(projectKey) || '[]');
     projects.push(newProject);
-    localStorage.setItem('user_projects', JSON.stringify(projects));
+    localStorage.setItem(projectKey, JSON.stringify(projects));
+    
     localStorage.removeItem('pending_plan');
+    localStorage.removeItem('pending_project_name');
     
     showDashboard(mockUser.name);
 }
@@ -191,7 +198,7 @@ async function handleLogin(e) {
         let name = email.split('@')[0];
         name = name.charAt(0).toUpperCase() + name.slice(1);
         localStorage.setItem('mockUser', JSON.stringify({ email: email, name: name }));
-        handlePostLogin(name);
+        handlePostLogin(name, email);
         return;
     }
 
@@ -203,7 +210,7 @@ async function handleLogin(e) {
     if (error) {
         errorEl.innerText = error.message;
     } else {
-        handlePostLogin(data.user.user_metadata?.first_name || data.user.email.split('@')[0]);
+        handlePostLogin(data.user.user_metadata?.first_name || data.user.email.split('@')[0], data.user.email);
     }
 }
 
@@ -225,7 +232,7 @@ async function handleSignup(e) {
         // Mock signup success
         let fullName = name + ' ' + surname;
         localStorage.setItem('mockUser', JSON.stringify({ email: email, name: fullName }));
-        handlePostLogin(fullName);
+        handlePostLogin(fullName, email);
         return;
     }
 
@@ -245,7 +252,7 @@ async function handleSignup(e) {
     if (error) {
         errorEl.innerText = error.message;
     } else {
-        handlePostLogin(name + ' ' + surname);
+        handlePostLogin(name + ' ' + surname, email);
     }
 }
 
@@ -272,7 +279,16 @@ function closePlanModal() {
 }
 
 function handleModalSelect(planId) {
+    const nameInput = document.getElementById('project-name-input');
+    if (!nameInput.value) {
+        nameInput.style.borderColor = '#ef4444';
+        return;
+    }
+    
     localStorage.setItem('pending_plan', planId);
+    localStorage.setItem('pending_project_name', nameInput.value);
+    
+    nameInput.value = ''; // Reset for next time
     closePlanModal();
     const mockUser = JSON.parse(localStorage.getItem('mockUser') || '{"name": "User"}');
     showPayment(mockUser.name, planId);
