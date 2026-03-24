@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NUCLEAR AI → GEO Optimizer Service v2.0 • Production Hardened</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
+
+        :root {
+            --tw-color-primary: #00f0ff;
+        }
+
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+
+        .heading-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .header-gradient {
+            background: linear-gradient(90deg, #0a0a2e, #1a1a4e);
+        }
+
+        .section-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .section-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgb(0 240 255 / 0.1);
+        }
+
+        .code-block {
+            background: #0f0f23;
+            border: 1px solid #00f0ff33;
+        }
+
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .section-card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+
+            .header-gradient {
+                background: white;
+                color: black;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-[#0a0a2e] text-white">
+    <!-- HEADER -->
+    <div class="header-gradient py-12 border-b border-[#00f0ff33]">
+        <div class="max-w-5xl mx-auto px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-x-4">
+                    <div
+                        class="w-14 h-14 bg-[#00f0ff] text-[#0a0a2e] rounded-2xl flex items-center justify-center text-4xl font-bold heading-font">
+                        N</div>
+                    <div>
+                        <h1 class="text-6xl font-semibold tracking-tighter heading-font">NUCLEAR AI</h1>
+                        <p class="text-[#00f0ff] text-2xl font-medium tracking-wide">GEO OPTIMIZER SERVICE • v2.0</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span
+                        class="inline-flex items-center px-6 py-3 bg-[#00f0ff] text-[#0a0a2e] font-semibold rounded-3xl text-lg">PRODUCTION
+                        HARDENED</span>
+                    <p class="text-sm text-gray-400 mt-3">Ready for Google Antigravity IDE • March 2026</p>
+                </div>
+            </div>
+
+            <div class="mt-10 grid grid-cols-3 gap-6">
+                <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/10">
+                    <p class="text-xs uppercase tracking-widest text-[#00f0ff]">Main Intent</p>
+                    <p class="text-2xl font-medium mt-2">Scraping • Analysis • Visibility with compliance &amp; ROI</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/10">
+                    <p class="text-xs uppercase tracking-widest text-[#00f0ff]">Pricing Tiers</p>
+                    <div class="flex gap-4 mt-3">
+                        <div class="text-center">
+                            <div class="text-lg font-bold">$149</div>
+                            <div class="text-xs">Starter</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-lg font-bold">$399</div>
+                            <div class="text-xs">Pro</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-lg font-bold">$999</div>
+                            <div class="text-xs">Enterprise</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/10">
+                    <p class="text-xs uppercase tracking-widest text-[#00f0ff]">Per Audit Cost</p>
+                    <p class="text-4xl font-semibold text-[#00f0ff]">$2.80 – $6.30</p>
+                    <p class="text-sm mt-1">at scale • 2026 rates</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-5xl mx-auto px-8 py-12">
+
+        <!-- KEY UPGRADES -->
+        <div class="mb-16">
+            <h2 class="text-4xl font-semibold heading-font tracking-tight mb-6">Key Production Upgrades in v2.0</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div class="bg-white/5 border border-[#00f0ff33] rounded-3xl p-6 flex items-start gap-4 section-card">
+                    <span class="text-3xl">✅</span>
+                    <div>
+                        <p class="font-semibold">Terminal AUDIT_COMPLETE event</p>
+                        <p class="text-sm text-gray-400">Eliminates dashboard refresh bug</p>
+                    </div>
+                </div>
+                <div class="bg-white/5 border border-[#00f0ff33] rounded-3xl p-6 flex items-start gap-4 section-card">
+                    <span class="text-3xl">✅</span>
+                    <div>
+                        <p class="font-semibold">Mandatory Compliance &amp; Ethics Gate</p>
+                        <p class="text-sm text-gray-400">robots.txt + ToS + GDPR block</p>
+                    </div>
+                </div>
+                <div class="bg-white/5 border border-[#00f0ff33] rounded-3xl p-6 flex items-start gap-4 section-card">
+                    <span class="text-3xl">✅</span>
+                    <div>
+                        <p class="font-semibold">Configurable thresholds</p>
+                        <p class="text-sm text-gray-400">Engineer DSPy auto-optimizes</p>
+                    </div>
+                </div>
+                <div class="bg-white/5 border border-[#00f0ff33] rounded-3xl p-6 flex items-start gap-4 section-card">
+                    <span class="text-3xl">✅</span>
+                    <div>
+                        <p class="font-semibold">Multi-tenancy enforced</p>
+                        <p class="text-sm text-gray-400">client_{user_id}_ prefix on all DBs</p>
+                    </div>
+                </div>
+                <div class="bg-white/5 border border-[#00f0ff33] rounded-3xl p-6 flex items-start gap-4 section-card">
+                    <span class="text-3xl">✅</span>
+                    <div>
+                        <p class="font-semibold">New Validator Agent + Cost Monitor</p>
+                        <p class="text-sm text-gray-400">Live citation reality check</p>
+                    </div>
+                </div>
+                <div class="bg-white/5 border border-[#00f0ff33] rounded-3xl p-6 flex items-start gap-4 section-card">
+                    <span class="text-3xl">✅</span>
+                    <div>
+                        <p class="font-semibold">GA4 + Search Console ROI correlation</p>
+                        <p class="text-sm text-gray-400">One-click GEO Recommendation Pack</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ARCHITECTURE DIAGRAM PLACEHOLDER -->
+        <div class="mb-16 border-2 border-dashed border-[#00f0ff] rounded-3xl p-8 text-center">
+            <p class="uppercase text-xs tracking-widest text-[#00f0ff] mb-4">Architecture Overview</p>
+            <div
+                class="bg-[#111133] h-96 rounded-2xl flex items-center justify-center text-4xl font-light text-[#00f0ff33]">
+                [ INSERT YOUR ORIGINAL SCREENSHOT DIAGRAM HERE ]<br>
+                <span class="block text-sm mt-4">Add v2.0 badge + Validator + Compliance Gate icons</span>
+            </div>
+        </div>
+
+        <!-- AGENTS SECTION -->
+        <h2 class="text-4xl font-semibold heading-font tracking-tight mb-10">The Nuclear Core — 7 Agents (Parallel &amp;
+            Event-Driven)</h2>
+
+        <!-- 1. Orchestrator -->
+        <div class="section-card bg-white/5 border border-white/10 rounded-3xl p-8 mb-8">
+            <div class="flex justify-between items-baseline mb-6">
+                <div>
+                    <span class="px-4 py-1 bg-[#00f0ff] text-[#0a0a2e] text-xs font-bold rounded-2xl">1</span>
+                    <h3 class="text-3xl font-semibold heading-font inline ml-4">The Orchestrator</h3>
+                </div>
+                <p class="text-[#00f0ff]">Global State &amp; Persona Manager</p>
+            </div>
+            <p class="text-gray-300 mb-6">In a parallel, event-driven system (Kafka or Redis Pub/Sub + LangGraph), the
+                Orchestrator defines the strategic battlefield and monitors system health and multi-tenancy scoping.</p>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <p class="font-semibold mb-3">Core Duties</p>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start"><span class="text-[#00f0ff] mr-3">•</span>Initializes pipeline,
+                            audit scope, baseline personas</li>
+                        <li class="flex items-start"><span class="text-[#00f0ff] mr-3">•</span>Enforces
+                            client_{user_id}_ prefix on all DB operations</li>
+                    </ul>
+                </div>
+                <div>
+                    <p class="font-semibold mb-3">Outputs (Published to Event Bus)</p>
+                    <div class="code-block p-5 text-sm rounded-2xl text-[#00f0ff] font-mono">
+                        AUDIT_INITIALIZED<br>
+                        TEST_SCENARIO_READY<br>
+                        <span class="text-emerald-400">AUDIT_COMPLETE</span> ← NEW (critical fix)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Prospector -->
+        <div class="section-card bg-white/5 border border-white/10 rounded-3xl p-8 mb-8">
+            <div class="flex justify-between items-baseline mb-6">
+                <div>
+                    <span class="px-4 py-1 bg-[#00f0ff] text-[#0a0a2e] text-xs font-bold rounded-2xl">2</span>
+                    <h3 class="text-3xl font-semibold heading-font inline ml-4">The Prospector</h3>
+                </div>
+                <p class="text-[#00f0ff]">Data Extraction &amp; DOM Parsing Engine</p>
+            </div>
+            <p class="text-gray-300 mb-6">Autonomous data gatherer with mandatory Compliance Gate before any scraping.
+            </p>
+            <div class="code-block p-5 text-sm rounded-2xl mb-6">
+                if not robots_txt_allowed(base_url) or domain in blocked_tos_list or ugc_source_violates_gdpr():<br>
+                    raise ComplianceBlock("Target blocked – legal risk")
+            </div>
+            <p class="font-semibold mb-3">Outputs (Published to Event Bus)</p>
+            <ul class="text-sm grid grid-cols-2 gap-y-4">
+                <li><span class="text-emerald-400">RAW_DATA_ACQUIRED</span></li>
+                <li><span class="text-emerald-400">UGC_CONSENSUS_GATHERED</span></li>
+                <li><span class="text-emerald-400">SYNTHETIC_SERP_EXTRACTED</span></li>
+                <li><span class="text-red-400">COMPLIANCE_REJECTED</span> ← NEW</li>
+            </ul>
+        </div>
+
+        <!-- 3. Researcher -->
+        <div class="section-card bg-white/5 border border-white/10 rounded-3xl p-8 mb-8">
+            <div class="flex justify-between items-baseline mb-6">
+                <div>
+                    <span class="px-4 py-1 bg-[#00f0ff] text-[#0a0a2e] text-xs font-bold rounded-2xl">3</span>
+                    <h3 class="text-3xl font-semibold heading-font inline ml-4">The Researcher</h3>
+                </div>
+                <p class="text-[#00f0ff]">RAG Processor &amp; Hallucination Auditor</p>
+            </div>
+            <p class="text-gray-300">Mathematical core with configurable thresholds.</p>
+            <div class="code-block p-5 text-sm rounded-2xl my-6">
+                "hallucination_threshold": 0.85 // Engineer DSPy-optimizes every 500 audits
+            </div>
+            <p class="font-semibold mb-3">Outputs</p>
+            <div class="text-emerald-400">AUDIT_ANALYZED</div>
+        </div>
+
+        <!-- 4. Learner -->
+        <div class="section-card bg-white/5 border border-white/10 rounded-3xl p-8 mb-8">
+            <div class="flex justify-between items-baseline mb-6">
+                <div>
+                    <span class="px-4 py-1 bg-[#00f0ff] text-[#0a0a2e] text-xs font-bold rounded-2xl">4</span>
+                    <h3 class="text-3xl font-semibold heading-font inline ml-4">The Learner</h3>
+                </div>
+                <p class="text-[#00f0ff]">Knowledge Graph &amp; Adaptive Trigger</p>
+            </div>
+            <p class="text-gray-300">Enforces multi-tenancy on Neo4j/Pinecone.</p>
+        </div>
+
+        <!-- 5. Engineer -->
+        <div class="section-card bg-white/5 border border-white/10 rounded-3xl p-8 mb-8">
+            <div class="flex justify-between items-baseline mb-6">
+                <div>
+                    <span class="px-4 py-1 bg-[#00f0ff] text-[#0a0a2e] text-xs font-bold rounded-2xl">5</span>
+                    <h3 class="text-3xl font-semibold heading-font inline ml-4">The Engineer</h3>
+                </div>
+                <p class="text-[#00f0ff]">System Optimization &amp; Prompt Engineering</p>
+            </div>
+            <p class="text-gray-300">Now includes Threshold Optimization Loop + Cost Monitor sub-agent.</p>
+        </div>
+
+        <!-- 6. Designer -->
+        <div class="section-card bg-white/5 border border-white/10 rounded-3xl p-8 mb-8">
+            <div class="flex justify-between items-baseline mb-6">
+                <div>
+                    <span class="px-4 py-1 bg-[#00f0ff] text-[#0a0a2e] text-xs font-bold rounded-2xl">6</span>
+                    <h3 class="text-3xl font-semibold heading-font inline ml-4">The Designer</h3>
+                </div>
+                <p class="text-[#00f0ff]">Data Visualization &amp; Presentation Layer</p>
+            </div>
+            <p class="text-gray-300">Subscribes to AUDIT_COMPLETE • Generates one-click GEO Recommendation Pack with ROI
+                numbers.</p>
+        </div>
+
+        <!-- 7. Validator (New) -->
+        <div class="section-card bg-emerald-400/10 border border-emerald-400/30 rounded-3xl p-8">
+            <div class="flex justify-between items-baseline mb-6">
+                <div>
+                    <span class="px-4 py-1 bg-emerald-400 text-white text-xs font-bold rounded-2xl">7 • NEW</span>
+                    <h3 class="text-3xl font-semibold heading-font inline ml-4 text-emerald-400">The Validator Agent
+                    </h3>
+                </div>
+                <p class="text-emerald-400">Citation Reality Check</p>
+            </div>
+            <p class="text-emerald-400">Live post-audit verification • Outputs VALIDATION_REPORT • Triggers final
+                AUDIT_COMPLETE</p>
+        </div>
+
+        <!-- COMMERCIAL READINESS -->
+        <div class="mt-16 bg-gradient-to-r from-[#00f0ff] to-[#00b8ff] text-[#0a0a2e] rounded-3xl p-10">
+            <h2 class="text-3xl font-semibold heading-font">Commercial Readiness &amp; SLA</h2>
+            <div class="mt-6 flex flex-wrap gap-8">
+                <div>
+                    <p class="font-semibold">Operational Cost</p>
+                    <p class="text-5xl">$2.80 – $6.30 per audit</p>
+                </div>
+                <div>
+                    <p class="font-semibold">SLA</p>
+                    <p class="text-2xl">99.9% uptime • &lt; 4h turnaround</p>
+                </div>
+                <div>
+                    <p class="font-semibold">Legal</p>
+                    <p class="text-2xl">Full compliance report per audit</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-12 text-center text-xs text-gray-400 no-print">
+            This is a complete, print-ready specification.<br>
+            <strong>TO CREATE YOUR PDF:</strong> Press Ctrl + P (or Cmd + P) → Choose “Save as PDF” → A4 Portrait →
+            Margins: None
+        </div>
+    </div>
+
+    <script>
+        // Tailwind script activation
+        document.documentElement.setAttribute('data-tailwind', 'true')
+    </script>
+</body>
+
+</html>
