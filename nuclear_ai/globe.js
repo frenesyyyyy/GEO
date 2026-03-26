@@ -8,6 +8,7 @@
  *   • EdgesGeometry network lines over the globe surface
  *   • Infinite Y-axis rotation
  *   • Red location-marker pins that pop out from the surface
+ *   • Message popups that appear/disappear every 3 seconds
  *   • CSS mask-image handles the bottom gradient fade
  *
  *  Dependencies: Three.js r128+ loaded globally (THREE)
@@ -47,6 +48,22 @@
         pinScaleInDuration: 0.3,
         pinHoldDuration:    0.4,
         pinScaleOutDuration:0.3,
+
+        // Message Popups
+        messageCycleTime:   3000, // 3 seconds on, 3 seconds off
+        messages: [
+            "best software for 3d animation rn",
+            "I'm out with the girls in rome, best pub to meet other people",
+            "Why don't I appear in AI search?",
+            "Barber shop with cheapest price in town",
+            "I'm tired to cook today, suggest me a delivery app for dinner",
+            "What's the difference between GEO and SEO",
+            "How to get my business on top of AI search?",
+            "How to get my business on top of Google?",
+            "Nuclear AI helped me increasing viibility!",
+            "expert lawyer for divorce in Hamburg",
+            "I have 200$ to invest in crypto, what cryptowallet do you suggest"
+        ]
     };
 
     /* --------------------------------------------------
@@ -211,14 +228,95 @@
         }
     }
 
-    // Spawn 4 pins immediately, then periodically
-    for (let i = 0; i < CONFIG.pinMaxCount; i++) {
-        setTimeout(spawnPin, i * 250);
+    /* --------------------------------------------------
+     *  6. MESSAGE POPUP SYSTEM
+     * -------------------------------------------------- */
+    const labels = [];
+    const NUM_LABELS = 3;
+
+    function createLabels() {
+        for (let i = 0; i < NUM_LABELS; i++) {
+            const el = document.createElement('div');
+            el.className = 'globe-label';
+            container.appendChild(el);
+            labels.push({
+                element: el,
+                pos: new THREE.Vector3(),
+                active: false,
+                delay: 0
+            });
+        }
     }
-    setInterval(spawnPin, CONFIG.pinSpawnInterval);
+    createLabels();
+
+    let labelsVisible = false;
+    let labelTimer = 0;
+
+    function showRandomLabels() {
+        const availableMessages = [...CONFIG.messages];
+        labels.forEach(l => {
+            const idx = Math.floor(Math.random() * availableMessages.length);
+            l.element.textContent = availableMessages.splice(idx, 1)[0];
+            
+            // Random position
+            const lat = (Math.random() - 0.5) * 120;
+            const lon = Math.random() * 360 - 180;
+            l.pos = latLonToVec3(lat, lon, CONFIG.globeRadius + 0.2);
+            l.active = true;
+            l.element.classList.add('active');
+        });
+        labelsVisible = true;
+        labelTimer = 0;
+    }
+
+    function hideLabels() {
+        labels.forEach(l => {
+            l.active = false;
+            l.element.classList.remove('active');
+        });
+        labelsVisible = false;
+        labelTimer = 0;
+    }
+
+    const tempVec = new THREE.Vector3();
+    const cameraDir = new THREE.Vector3();
+
+    function updateLabels() {
+        camera.getWorldDirection(cameraDir);
+        
+        labels.forEach(l => {
+            if (!l.active) return;
+
+            // Project 3D position to 2D screen space
+            // Need to account for globe's current rotation
+            tempVec.copy(l.pos);
+            tempVec.applyMatrix4(globeGroup.matrixWorld);
+            
+            // Occlusion check: hidden if point is behind the center of the globe relative to camera
+            const dot = tempVec.clone().normalize().dot(camera.position.clone().normalize());
+            if (dot < 0.2) { // Threshold for "back of globe"
+                l.element.style.opacity = '0';
+                l.element.style.pointerEvents = 'none';
+            } else {
+                l.element.style.opacity = labelsVisible ? '1' : '0';
+                l.element.style.pointerEvents = 'auto';
+            }
+
+            tempVec.project(camera);
+
+            const x = (tempVec.x * 0.5 + 0.5) * container.clientWidth;
+            const y = (tempVec.y * -0.5 + 0.5) * container.clientHeight;
+
+            l.element.style.left = `${x}px`;
+            l.element.style.top = `${y}px`;
+        });
+    }
+
+    // Initial show
+    showRandomLabels();
 
     /* --------------------------------------------------
-     *  6. RESIZE HANDLING
+     *  7. RESIZE HANDLING
      * -------------------------------------------------- */
     function onResize() {
         const s = Math.max(container.clientWidth, container.clientHeight) || 1100;
@@ -229,15 +327,27 @@
     window.addEventListener('resize', onResize);
 
     /* --------------------------------------------------
-     *  7. ANIMATION LOOP
+     *  8. ANIMATION LOOP
      * -------------------------------------------------- */
     const clock = new THREE.Clock();
 
     function animate() {
         requestAnimationFrame(animate);
         const delta = clock.getDelta();
+        
         globeGroup.rotation.y += CONFIG.rotationSpeedY;
         updatePins(delta);
+
+        // Message Popup Logic: 3s up, 3s down
+        labelTimer += delta * 1000;
+        if (labelsVisible && labelTimer >= CONFIG.messageCycleTime) {
+            hideLabels();
+        } else if (!labelsVisible && labelTimer >= CONFIG.messageCycleTime) {
+            showRandomLabels();
+        }
+
+        updateLabels();
+
         renderer.render(scene, camera);
     }
     animate();
