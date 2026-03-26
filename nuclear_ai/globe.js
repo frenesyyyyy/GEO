@@ -262,10 +262,10 @@
             lon = Math.random() * 360 - 180;
             const localPos = latLonToVec3(lat, lon, CONFIG.globeRadius + 0.2);
             
-            // Calculate world position based on globe rotation
+            // World position
             worldPos.copy(localPos).applyMatrix4(globeGroup.matrixWorld);
             
-            // Check dot product with camera position
+            // Dot product with camera position
             const dot = worldPos.clone().normalize().dot(camera.position.clone().normalize());
             if (dot > 0.6) return { lat, lon, pos: localPos }; 
             attempts++;
@@ -275,11 +275,30 @@
 
     function showRandomLabels() {
         const availableMessages = [...CONFIG.messages];
+        const pickedPositions = [];
+
         labels.forEach(l => {
             const idx = Math.floor(Math.random() * availableMessages.length);
             l.element.textContent = availableMessages.splice(idx, 1)[0];
             
-            const coords = getFrontFacingCoordinates();
+            let coords;
+            let validSpacing = false;
+            let attempts = 0;
+
+            // Find a position that is front-facing AND distant from already picked ones
+            while (!validSpacing && attempts < 30) {
+                coords = getFrontFacingCoordinates();
+                validSpacing = true;
+                for (const otherPos of pickedPositions) {
+                    if (coords.pos.distanceTo(otherPos) < 1.5) { // Minimum 3D distance
+                        validSpacing = false;
+                        break;
+                    }
+                }
+                attempts++;
+            }
+
+            pickedPositions.push(coords.pos);
             l.pos = coords.pos;
             l.active = true;
             l.element.classList.add('active');
@@ -299,16 +318,12 @@
 
     function updateLabels() {
         labels.forEach(l => {
-            // Stop updating or hide if label is inactive to prevent 'ghost transitions'
             if (!l.active) {
-                // We keep moving it for 0.6s during transition, then total hidden
                 if (labelTimer > 600 && !labelsVisible) return;
             }
 
-            // Sync 3D to 2D
             tempVec.copy(l.pos).applyMatrix4(globeGroup.matrixWorld);
             
-            // Restrictive Occlusion: Increase to 0.5 so they hide earlier on the sides
             const dot = tempVec.clone().normalize().dot(camera.position.clone().normalize());
             if (dot < 0.5) {
                 l.element.style.opacity = '0';
@@ -327,7 +342,7 @@
         });
     }
 
-    // Start with a small delay so globe is tilted
+    // Initial delay so globe is tilted
     setTimeout(showRandomLabels, 500);
 
     /* --------------------------------------------------
@@ -353,7 +368,6 @@
         globeGroup.rotation.y += CONFIG.rotationSpeedY;
         updatePins(delta);
 
-        // Message Popup Cycle: 3s Visible -> 3s Invisible
         labelTimer += delta * 1000;
         if (labelsVisible && labelTimer >= CONFIG.messageCycleTime) {
             hideLabels();
