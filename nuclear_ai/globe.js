@@ -42,11 +42,11 @@
         pinEmissive:        0x881111,
 
         // Pin lifecycle
-        pinSpawnInterval:   3000,
-        pinMaxCount:        5,
-        pinScaleInDuration: 0.8,
-        pinHoldDuration:    2.8,
-        pinScaleOutDuration:0.6,
+        pinSpawnInterval:   1000,
+        pinMaxCount:        4,
+        pinScaleInDuration: 0.3,
+        pinHoldDuration:    0.4,
+        pinScaleOutDuration:0.3,
     };
 
     /* --------------------------------------------------
@@ -211,9 +211,9 @@
         }
     }
 
-    // Spawn 5 pins immediately, then periodically
+    // Spawn 4 pins immediately, then periodically
     for (let i = 0; i < CONFIG.pinMaxCount; i++) {
-        setTimeout(spawnPin, i * 400);
+        setTimeout(spawnPin, i * 250);
     }
     setInterval(spawnPin, CONFIG.pinSpawnInterval);
 
