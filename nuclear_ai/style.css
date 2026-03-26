@@ -14,15 +14,15 @@
 /* ── 3D Globe Background ── */
 #globe-container {
   position: fixed;
-  bottom: -120px;
-  right: -120px;
-  width: 700px;
-  height: 700px;
-  z-index: -1;
+  bottom: -280px;
+  right: -280px;
+  width: 1100px;
+  height: 1100px;
+  z-index: 1;
   pointer-events: none;
-  /* Bottom gradient mask — fades the lower portion into white */
-  -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 95%);
-  mask-image: linear-gradient(to bottom, black 50%, transparent 95%);
+  /* Bottom gradient mask — fades only the bottom of the globe into white */
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 92%);
+  mask-image: linear-gradient(to bottom, black 60%, transparent 92%);
 }
 
 * {
@@ -135,6 +135,8 @@ nav ul li a:hover {
   align-items: center;
   min-height: calc(100vh - 80px);
   position: relative;
+  z-index: 2;
+  background: transparent;
 }
 
 .hero-content {
@@ -428,6 +430,9 @@ nav ul li a:hover {
   max-width: 1440px;
   margin: 0 auto;
   text-align: center;
+  position: relative;
+  z-index: 2;
+  background: #ffffff;
 }
 
 .section-header {
@@ -555,6 +560,8 @@ nav ul li a:hover {
   padding: 60px 80px;
   background: #f9fafb;
   border-top: 1px solid #e5e7eb;
+  position: relative;
+  z-index: 2;
 }
 
 .footer-content {
