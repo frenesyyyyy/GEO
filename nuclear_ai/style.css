@@ -14,12 +14,14 @@
 /* ── 3D Globe Background ── */
 #globe-container {
   position: absolute;
-  bottom: -250px;
-  left: 650px;
-  width: 1000px;
-  height: 1000px;
+  bottom: -280px;
+  right: -220px;
+  left: auto;
+  width: 1100px;
+  height: 1100px;
   z-index: 0;
   pointer-events: none;
+  overflow: visible;
   /* Bottom gradient mask — fades the mid-bottom of the globe into white */
   -webkit-mask-image: linear-gradient(to bottom, black 45%, transparent 75%);
   mask-image: linear-gradient(to bottom, black 45%, transparent 75%);
