@@ -11,6 +11,20 @@
   --font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
+/* ── 3D Globe Background ── */
+#globe-container {
+  position: fixed;
+  bottom: -180px;
+  right: -180px;
+  width: 750px;
+  height: 750px;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.15s ease-out;
+  will-change: opacity;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
