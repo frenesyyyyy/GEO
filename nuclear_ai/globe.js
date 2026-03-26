@@ -233,6 +233,7 @@
      * -------------------------------------------------- */
     const labels = [];
     const NUM_LABELS = 3;
+    const tempVec = new THREE.Vector3();
 
     function createLabels() {
         for (let i = 0; i < NUM_LABELS; i++) {
@@ -242,8 +243,7 @@
             labels.push({
                 element: el,
                 pos: new THREE.Vector3(),
-                active: false,
-                delay: 0
+                active: false
             });
         }
     }
@@ -252,16 +252,35 @@
     let labelsVisible = false;
     let labelTimer = 0;
 
+    /** Returns coordinates that are currently facing the camera */
+    function getFrontFacingCoordinates() {
+        let lat, lon, worldPos = new THREE.Vector3();
+        let attempts = 0;
+        
+        while (attempts < 50) {
+            lat = (Math.random() - 0.5) * 110;
+            lon = Math.random() * 360 - 180;
+            const localPos = latLonToVec3(lat, lon, CONFIG.globeRadius + 0.2);
+            
+            // Calculate world position based on globe rotation
+            worldPos.copy(localPos).applyMatrix4(globeGroup.matrixWorld);
+            
+            // Check dot product with camera position
+            const dot = worldPos.clone().normalize().dot(camera.position.clone().normalize());
+            if (dot > 0.6) return { lat, lon, pos: localPos }; 
+            attempts++;
+        }
+        return { lat: 0, lon: 0, pos: latLonToVec3(0, 0, CONFIG.globeRadius + 0.2) };
+    }
+
     function showRandomLabels() {
         const availableMessages = [...CONFIG.messages];
         labels.forEach(l => {
             const idx = Math.floor(Math.random() * availableMessages.length);
             l.element.textContent = availableMessages.splice(idx, 1)[0];
             
-            // Random position
-            const lat = (Math.random() - 0.5) * 120;
-            const lon = Math.random() * 360 - 180;
-            l.pos = latLonToVec3(lat, lon, CONFIG.globeRadius + 0.2);
+            const coords = getFrontFacingCoordinates();
+            l.pos = coords.pos;
             l.active = true;
             l.element.classList.add('active');
         });
@@ -278,32 +297,28 @@
         labelTimer = 0;
     }
 
-    const tempVec = new THREE.Vector3();
-    const cameraDir = new THREE.Vector3();
-
     function updateLabels() {
-        camera.getWorldDirection(cameraDir);
-        
         labels.forEach(l => {
-            if (!l.active) return;
+            // Stop updating or hide if label is inactive to prevent 'ghost transitions'
+            if (!l.active) {
+                // We keep moving it for 0.6s during transition, then total hidden
+                if (labelTimer > 600 && !labelsVisible) return;
+            }
 
-            // Project 3D position to 2D screen space
-            // Need to account for globe's current rotation
-            tempVec.copy(l.pos);
-            tempVec.applyMatrix4(globeGroup.matrixWorld);
+            // Sync 3D to 2D
+            tempVec.copy(l.pos).applyMatrix4(globeGroup.matrixWorld);
             
-            // Occlusion check: hidden if point is behind the center of the globe relative to camera
+            // Restrictive Occlusion: Increase to 0.5 so they hide earlier on the sides
             const dot = tempVec.clone().normalize().dot(camera.position.clone().normalize());
-            if (dot < 0.2) { // Threshold for "back of globe"
+            if (dot < 0.5) {
                 l.element.style.opacity = '0';
-                l.element.style.pointerEvents = 'none';
+                l.element.style.visibility = 'hidden';
             } else {
                 l.element.style.opacity = labelsVisible ? '1' : '0';
-                l.element.style.pointerEvents = 'auto';
+                l.element.style.visibility = labelsVisible ? 'visible' : 'hidden';
             }
 
             tempVec.project(camera);
-
             const x = (tempVec.x * 0.5 + 0.5) * container.clientWidth;
             const y = (tempVec.y * -0.5 + 0.5) * container.clientHeight;
 
@@ -312,8 +327,8 @@
         });
     }
 
-    // Initial show
-    showRandomLabels();
+    // Start with a small delay so globe is tilted
+    setTimeout(showRandomLabels, 500);
 
     /* --------------------------------------------------
      *  7. RESIZE HANDLING
@@ -338,7 +353,7 @@
         globeGroup.rotation.y += CONFIG.rotationSpeedY;
         updatePins(delta);
 
-        // Message Popup Logic: 3s up, 3s down
+        // Message Popup Cycle: 3s Visible -> 3s Invisible
         labelTimer += delta * 1000;
         if (labelsVisible && labelTimer >= CONFIG.messageCycleTime) {
             hideLabels();
