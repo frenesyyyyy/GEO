@@ -33,7 +33,7 @@
         rotationSpeedY:     0.0018,
 
         // Camera distance (zoomed out so globe doesn't clip)
-        cameraZ:            7.5,
+        cameraZ:            9.0,
 
         // Pin appearance — red map markers
         pinHeadRadius:      0.06,
