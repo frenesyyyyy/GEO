@@ -14,10 +14,10 @@
 /* ── 3D Globe Background ── */
 #globe-container {
   position: absolute;
-  bottom: -280px;
+  bottom: -250px;
   left: 650px;
-  width: 1100px;
-  height: 1100px;
+  width: 1000px;
+  height: 1000px;
   z-index: 0;
   pointer-events: none;
   /* Bottom gradient mask — fades the mid-bottom of the globe into white */
@@ -44,7 +44,7 @@
   transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   z-index: 1000;
   white-space: normal;
-  max-width: 200px;
+  max-width: 240px;
   line-height: 1.4;
   text-align: center;
 }
@@ -175,10 +175,8 @@ nav ul li a:hover {
   display: flex;
   align-items: center;
   min-height: calc(100vh - 80px);
-  position: relative;
   z-index: 2;
   background: transparent;
-  overflow: hidden;
 }
 
 .hero-content {
