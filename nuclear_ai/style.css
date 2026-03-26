@@ -20,9 +20,9 @@
   height: 1100px;
   z-index: 1;
   pointer-events: none;
-  /* Bottom gradient mask — fades only the bottom of the globe into white */
-  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 92%);
-  mask-image: linear-gradient(to bottom, black 60%, transparent 92%);
+  /* Bottom gradient mask — fades the mid-bottom of the globe into white */
+  -webkit-mask-image: linear-gradient(to bottom, black 45%, transparent 75%);
+  mask-image: linear-gradient(to bottom, black 45%, transparent 75%);
 }
 
 * {
