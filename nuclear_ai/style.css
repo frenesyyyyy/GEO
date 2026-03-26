@@ -15,7 +15,7 @@
 #globe-container {
   position: absolute;
   bottom: -280px;
-  right: 160px;
+  left: 150px;
   width: 1100px;
   height: 1100px;
   z-index: 0;
@@ -635,9 +635,17 @@ nav ul li a:hover {
 }
 
 @media (max-width: 768px) {
-  .footer-content { flex-direction: column; gap: 20px; text-align: center; }
-  .site-footer { padding: 40px 40px; }
+  .footer-content {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .site-footer {
+    padding: 40px 40px;
+  }
 }
+
 /* Pricing Page Styles */
 .pricing-section {
   padding: 120px 80px;
@@ -791,8 +799,13 @@ nav ul li a:hover {
 }
 
 @media (max-width: 1024px) {
-  .pricing-grid { grid-template-columns: 1fr; }
-  .pricing-section { padding: 80px 40px; }
+  .pricing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-section {
+    padding: 80px 40px;
+  }
 }
 
 /* Startup Page Styles */
@@ -974,7 +987,7 @@ nav ul li a:hover {
 .data-viz-container {
   margin-top: 80px;
   padding: 40px;
-  background: rgba(255,255,255,0.5);
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 24px;
   border: 1px solid var(--glass-border);
 }
@@ -1027,15 +1040,39 @@ nav ul li a:hover {
 }
 
 @keyframes growBar {
-  from { transform: scaleY(0); }
-  to { transform: scaleY(1); }
+  from {
+    transform: scaleY(0);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
 }
 
 @media (max-width: 1024px) {
-  .pricing-grid { grid-template-columns: 1fr; }
-  .pricing-section { padding: 80px 40px; }
-  .startup-section { padding: 40px 20px; }
-  .focus-grid { grid-template-columns: 1fr; }
-  .delivery-section { grid-template-columns: 1fr; padding: 40px; }
-  .delivery-row { flex-direction: column; gap: 12px; }
+  .pricing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-section {
+    padding: 80px 40px;
+  }
+
+  .startup-section {
+    padding: 40px 20px;
+  }
+
+  .focus-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .delivery-section {
+    grid-template-columns: 1fr;
+    padding: 40px;
+  }
+
+  .delivery-row {
+    flex-direction: column;
+    gap: 12px;
+  }
 }
