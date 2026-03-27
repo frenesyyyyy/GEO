@@ -665,7 +665,7 @@ nav ul li a:hover {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid black !important;
   padding: 48px 40px;
   border-radius: 32px;
   text-align: left;
@@ -687,7 +687,7 @@ nav ul li a:hover {
 .pricing-card.featured {
   background: var(--primary-color);
   color: white;
-  border: 1px solid rgba(0, 240, 255, 0.3);
+  border: 2px solid black !important;
   box-shadow: 0 20px 60px rgba(0, 240, 255, 0.15);
 }
 
@@ -743,9 +743,12 @@ nav ul li a:hover {
 
 .card-features li i {
   color: var(--accent-color);
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  flex-shrink: 0 !important;
+  margin-top: 3px;
 }
 
 .pricing-btn {
@@ -1324,14 +1327,15 @@ nav ul li a:hover {
 }
 
 .plasma-pink-card {
-  background: rgba(255, 0, 127, 0.08) !important;
-  border: 1px solid rgba(255, 0, 127, 0.3) !important;
-  box-shadow: 0 20px 60px rgba(255, 0, 127, 0.1) !important;
+  background: white !important;
+  color: #111827 !important;
+  border: 2px solid black !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.05) !important;
 }
 
 .plasma-pink-card:hover {
-  border-color: rgba(255, 0, 127, 0.6) !important;
-  box-shadow: 0 40px 80px rgba(255, 0, 127, 0.2) !important;
-  background: rgba(255, 0, 127, 0.12) !important;
+  border-color: black !important;
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.1) !important;
+  background: white !important;
 }
 
