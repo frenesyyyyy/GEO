@@ -1076,3 +1076,28 @@ nav ul li a:hover {
     gap: 12px;
   }
 }
+
+/* Token Styling */
+.token-green {
+  color: #4ade80;
+  font-weight: 700;
+}
+
+.token-gold {
+  color: #fbbf24;
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+}
+
+.pricing-grid-note {
+  text-align: center;
+  margin-top: 32px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.pricing-grid-note a {
+  color: #111827;
+  text-decoration: underline;
+  font-weight: 600;
+}
