@@ -1089,6 +1089,12 @@ nav ul li a:hover {
   text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
 }
 
+.token-grey {
+  color: #d1d5db;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(209, 213, 219, 0.3);
+}
+
 .pricing-grid-note {
   text-align: center;
   margin-top: 32px;
@@ -1315,5 +1321,17 @@ nav ul li a:hover {
   .modal-content {
     padding: 32px 24px;
   }
+}
+
+.plasma-pink-card {
+  background: rgba(255, 0, 127, 0.08) !important;
+  border: 1px solid rgba(255, 0, 127, 0.3) !important;
+  box-shadow: 0 20px 60px rgba(255, 0, 127, 0.1) !important;
+}
+
+.plasma-pink-card:hover {
+  border-color: rgba(255, 0, 127, 0.6) !important;
+  box-shadow: 0 40px 80px rgba(255, 0, 127, 0.2) !important;
+  background: rgba(255, 0, 127, 0.12) !important;
 }
 
