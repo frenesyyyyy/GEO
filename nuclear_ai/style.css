@@ -1109,4 +1109,89 @@ nav ul li a:hover {
   margin-right: 12px;
   object-fit: contain;
 }
+
+/* Token Store Section */
+.token-store-section {
+  padding: 80px 0;
+  text-align: center;
+}
+
+.token-store-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 1000px;
+  margin: 40px auto 0;
+}
+
+.token-pack-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+}
+
+.token-pack-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+  border-color: #e5e7eb;
+}
+
+.token-pack-card img {
+  width: 70px;
+  height: 70px;
+  margin-bottom: 24px;
+}
+
+.token-pack-card h4 {
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.token-pack-card .pack-amount {
+  font-size: 40px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.token-pack-card .pack-price {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent-color);
+  margin-bottom: 24px;
+}
+
+.btn-buy-tokens {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: #111827;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-buy-tokens:hover {
+  background: #374151;
+  transform: scale(1.02);
+}
+
+/* Responsive Token Store */
+@media (max-width: 900px) {
+  .token-store-grid {
+    grid-template-columns: 1fr;
+    padding: 0 24px;
+  }
+}
 
