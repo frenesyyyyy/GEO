@@ -741,28 +741,6 @@ nav ul li a:hover {
   font-size: 15px;
 }
 
-.sub-features {
-  list-style: none;
-  padding-left: 0;
-  margin-top: 12px;
-  font-size: 13px;
-  opacity: 0.8;
-  border-left: 2px solid var(--accent-color);
-  padding-left: 16px;
-}
-
-.sub-features li {
-  margin-bottom: 8px;
-  display: list-item;
-  list-style-type: none;
-}
-
-.sub-features li::before {
-  content: "→";
-  margin-right: 8px;
-  color: var(--accent-color);
-}
-
 .card-features li i {
   color: var(--accent-color);
   width: 18px;
