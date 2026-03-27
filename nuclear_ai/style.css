@@ -1315,6 +1315,14 @@ nav ul li a:hover {
   line-height: 1.6;
 }
 
+.enterprise-gold {
+  color: #fbbf24 !important;
+  font-weight: 800;
+  text-decoration: underline !important;
+  text-shadow: 0 0 12px rgba(251, 191, 36, 0.5);
+  cursor: pointer;
+}
+
 .audit-link {
   text-decoration: underline !important;
   font-weight: 600;
