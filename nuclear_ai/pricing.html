@@ -49,10 +49,12 @@
                 <div class="price">149€<span>/mo</span></div>
                 <ul class="card-features">
                     <li><i data-lucide="check-circle-2"></i> General GEO/SEO increase guaranteed</li>
-                    <li><i data-lucide="check-circle-2"></i> Monthly audits (<a class="audit-link" data-plan="plus">check out more</a>)</li>
+                    <li><i data-lucide="check-circle-2"></i> Monthly audits (<a class="audit-link"
+                            data-plan="plus">check out more</a>)</li>
                     <li><i data-lucide="check-circle-2"></i> Final asset product</li>
                     <li><i data-lucide="check-circle-2"></i> Monthly meeting</li>
-                    <li><img src="token.png" alt="Token" class="token-icon"> <span class="token-green">500 NuclearAI Tokens</span></li>
+                    <li><img src="token.png" alt="Token" class="token-icon"> <span class="token-green">500 NuclearAI
+                            Tokens</span></li>
                 </ul>
                 <button class="pricing-btn" onclick="selectPlan('plus')">Get Started</button>
             </div>
@@ -67,11 +69,13 @@
                 <div class="price">499€<span>/mo</span></div>
                 <ul class="card-features">
                     <li><i data-lucide="check-circle-2"></i> High GEO/SEO visibility increase guaranteed</li>
-                    <li><i data-lucide="check-circle-2"></i> Weekly audits (<a class="audit-link" data-plan="master">check out more</a>)
+                    <li><i data-lucide="check-circle-2"></i> Weekly audits (<a class="audit-link"
+                            data-plan="master">check out more</a>)
                     </li>
                     <li><i data-lucide="check-circle-2"></i> Final asset product</li>
                     <li><i data-lucide="check-circle-2"></i> Monthly meeting</li>
-                    <li><img src="tokenblack.png" alt="Token" class="token-icon"> <span class="token-gold">1500 NuclearAI Tokens</span></li>
+                    <li><img src="tokenblack.png" alt="Token" class="token-icon"> <span class="token-gold">1500
+                            NuclearAI Tokens</span></li>
                 </ul>
                 <button class="pricing-btn" onclick="selectPlan('master')">Choose Master</button>
             </div>
@@ -87,7 +91,8 @@
                     <li><i data-lucide="check-circle-2"></i> Top-tier security audit</li>
                     <li><i data-lucide="check-circle-2"></i> Deployment & Launch support</li>
                     <li><i data-lucide="check-circle-2"></i> Strategic consultation</li>
-                    <li><img src="token.png" alt="Token" class="token-icon"> <span class="token-gold">300-4000 NuclearAI Tokens</span>
+                    <li><img src="token.png" alt="Token" class="token-icon"> <span class="token-gold">300-4000 NuclearAI
+                            Tokens</span>
                     </li>
                 </ul>
                 <button class="pricing-btn" onclick="selectPlan('mvp')">Buy MVP</button>
@@ -154,7 +159,7 @@
         const modal = document.getElementById('audit-modal');
         const closeModal = document.getElementById('close-modal');
         const auditLinks = document.querySelectorAll('.audit-link');
-        
+
         const modalTitle = document.getElementById('modal-title');
         const modalFrequency = document.getElementById('modal-frequency');
         const modalTech = document.getElementById('modal-tech');
@@ -163,12 +168,12 @@
             plus: {
                 title: 'Plus Strategic Visibility',
                 frequency: '4 professional audits per month strategically scheduled to track your search growth milestones.',
-                tech: 'Focuses on key platform visibility and sentiment across major AI search models like GPT-4o and Claude.'
+                tech: 'Leverages deep technology scraping and high-usage API integration. Provides detailed procedures after complex procedural analysis.'
             },
             master: {
                 title: 'Master Elite Intelligence',
                 frequency: '2 high-frequency weekly reports (8+ per month) providing real-time data on search fluctuations.',
-                tech: 'Leverages deep technology scraping and high-usage API integration. Provides detailed procedures for complex procedural analysis.'
+                tech: 'Maximum frequency of deep technology scraping and extreme-usage API integration. Results are surgically extracted and provides detailed procedures after complex procedural analysis.'
             }
         };
 
@@ -177,11 +182,11 @@
                 e.preventDefault();
                 const plan = link.getAttribute('data-plan');
                 const data = planData[plan];
-                
+
                 modalTitle.innerText = data.title;
                 modalFrequency.innerText = data.frequency;
                 modalTech.innerText = data.tech;
-                
+
                 modal.classList.add('active');
                 lucide.createIcons(); // Refresh icons inside modal
             });
