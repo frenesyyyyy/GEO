@@ -1100,4 +1100,13 @@ nav ul li a:hover {
   color: #111827;
   text-decoration: underline;
   font-weight: 600;
-}
+}
+
+.token-icon {
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  margin-right: 12px;
+  object-fit: contain;
+}
+
