@@ -49,8 +49,7 @@
                 <div class="price">149€<span>/mo</span></div>
                 <ul class="card-features">
                     <li><i data-lucide="check-circle-2"></i> General GEO/SEO increase guaranteed</li>
-                    <li><i data-lucide="check-circle-2"></i> Monthly audits (<a href="resources.html">check out
-                            more</a>)</li>
+                    <li><i data-lucide="check-circle-2"></i> Monthly audits (<a class="audit-link" data-plan="plus">check out more</a>)</li>
                     <li><i data-lucide="check-circle-2"></i> Final asset product</li>
                     <li><i data-lucide="check-circle-2"></i> Monthly meeting</li>
                     <li><img src="token.png" alt="Token" class="token-icon"> <span class="token-green">500 NuclearAI Tokens</span></li>
@@ -68,7 +67,7 @@
                 <div class="price">499€<span>/mo</span></div>
                 <ul class="card-features">
                     <li><i data-lucide="check-circle-2"></i> High GEO/SEO visibility increase guaranteed</li>
-                    <li><i data-lucide="check-circle-2"></i> Weekly audits (<a href="resources.html">check out more</a>)
+                    <li><i data-lucide="check-circle-2"></i> Weekly audits (<a class="audit-link" data-plan="master">check out more</a>)
                     </li>
                     <li><i data-lucide="check-circle-2"></i> Final asset product</li>
                     <li><i data-lucide="check-circle-2"></i> Monthly meeting</li>
@@ -122,8 +121,77 @@
         </div>
     </footer>
 
+    <!-- Audit Detail Modal -->
+    <div id="audit-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" id="close-modal"><i data-lucide="x"></i></button>
+            <div id="modal-body">
+                <div class="section-header" style="text-align: left; margin-bottom: 32px;">
+                    <p class="badge">AUDIT DEPTH</p>
+                    <h2 id="modal-title">Strategic Reports</h2>
+                </div>
+                <div class="modal-grid">
+                    <div class="modal-feature-box">
+                        <h4><i data-lucide="bar-chart-3"></i> Frequency</h4>
+                        <p id="modal-frequency"></p>
+                    </div>
+                    <div class="modal-feature-box">
+                        <h4><i data-lucide="layers"></i> Technology</h4>
+                        <p id="modal-tech"></p>
+                    </div>
+                </div>
+                <div style="margin-top: 32px; font-size: 14px; color: var(--text-muted);">
+                    * All reports are delivered digitally and analyzed by our AI Search specialists.
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         lucide.createIcons();
+
+        // Modal Logic
+        const modal = document.getElementById('audit-modal');
+        const closeModal = document.getElementById('close-modal');
+        const auditLinks = document.querySelectorAll('.audit-link');
+        
+        const modalTitle = document.getElementById('modal-title');
+        const modalFrequency = document.getElementById('modal-frequency');
+        const modalTech = document.getElementById('modal-tech');
+
+        const planData = {
+            plus: {
+                title: 'Plus Strategic Visibility',
+                frequency: '4 professional audits per month strategically scheduled to track your search growth milestones.',
+                tech: 'Focuses on key platform visibility and sentiment across major AI search models like GPT-4o and Claude.'
+            },
+            master: {
+                title: 'Master Elite Intelligence',
+                frequency: '2 high-frequency weekly reports (8+ per month) providing real-time data on search fluctuations.',
+                tech: 'Leverages deep technology scraping and high-usage API integration. Provides detailed procedures for complex procedural analysis.'
+            }
+        };
+
+        auditLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const plan = link.getAttribute('data-plan');
+                const data = planData[plan];
+                
+                modalTitle.innerText = data.title;
+                modalFrequency.innerText = data.frequency;
+                modalTech.innerText = data.tech;
+                
+                modal.classList.add('active');
+                lucide.createIcons(); // Refresh icons inside modal
+            });
+        });
+
+        const closeFunc = () => modal.classList.remove('active');
+        closeModal.addEventListener('click', closeFunc);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeFunc();
+        });
 
         function selectPlan(id) {
             // Save plan ID to localStorage for post-auth retrieval
