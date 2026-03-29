@@ -727,6 +727,20 @@ nav ul li a:hover {
   color: rgba(255, 255, 255, 0.5);
 }
 
+.discount-price {
+  color: #ef4444;
+  text-decoration: line-through;
+  font-size: 18px;
+  font-weight: 500;
+  margin-right: 8px;
+  opacity: 0.8;
+}
+
+.pricing-card.featured .discount-price {
+  color: #fee2e2;
+  opacity: 0.9;
+}
+
 .card-features {
   list-style: none;
   margin-bottom: 40px;
