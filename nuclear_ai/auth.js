@@ -453,13 +453,14 @@ function switchDashboardTab(tabId) {
 
     // Hide ALL possible content sections first
     const sections = [
-        'projects-list', 'projects-timeline-container', 'empty-state', 'project-detail-area',
+        'projects-timeline-container', 'empty-state', 'project-detail-area',
         'detail-overview', 'detail-prompts', 'detail-sources', 'detail-models', 'detail-settings', 'detail-comply',
         'global-tokens', 'global-billing', 'global-request', 'global-discovery', 'global-howto', 'global-bug', 'global-core'
     ];
     sections.forEach(s => {
         const el = document.getElementById(s);
         if(el) el.style.display = 'none';
+        if(el && s === 'projects-list') el.style.display = 'flex'; // Safeguard
     });
 
     const isGlobal = tabId === 'tokens' || tabId === 'billing' || tabId === 'request' || 
@@ -468,6 +469,8 @@ function switchDashboardTab(tabId) {
     if (tabId === 'overview') {
         const timelineContainer = document.getElementById('projects-timeline-container');
         if(timelineContainer) timelineContainer.style.display = 'block';
+        const projectList = document.getElementById('projects-list');
+        if(projectList) projectList.style.display = 'flex';
 
         const isDetail = document.getElementById('project-detail-area').dataset.active === 'true';
         if (isDetail) {
