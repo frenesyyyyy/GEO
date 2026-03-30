@@ -18,19 +18,30 @@ window.addEventListener('DOMContentLoaded', () => {
 
 async function calcEarnings() {
     let total = 0;
-    const planPrices = { 'standard': 50, 'plus': 150, 'mvp': 1000 };
+    // Map both short and long names to prices
+    const planPrices = { 
+        'plus': 199, 'geo/seo plus': 199, 'standard': 199,
+        'enterprise': 799, 'geo/seo enterprise': 799,
+        'mvp': 1000, 'geo/seo mvp': 1000, 'mvp saas product': 1000
+    };
     if (isMockMode) {
         for (let i = 0; i < localStorage.length; i++) {
             const k = localStorage.key(i);
             if (k.startsWith('projects_')) {
                 const arr = JSON.parse(localStorage.getItem(k) || '[]');
-                arr.forEach(p => total += planPrices[p.plan] || 0);
+                arr.forEach(p => {
+                    const planKey = (p.plan || '').toLowerCase().trim();
+                    total += planPrices[planKey] || 0;
+                });
             }
         }
     } else {
         const { data, error } = await supabaseClient.from('projects').select('plan');
         if (!error && data) {
-            data.forEach(p => total += planPrices[p.plan] || 0);
+            data.forEach(p => {
+                const planKey = (p.plan || '').toLowerCase().trim();
+                total += planPrices[planKey] || 0;
+            });
         }
     }
     const badge = document.getElementById('earnings-val');
