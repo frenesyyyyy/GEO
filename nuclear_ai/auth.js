@@ -466,6 +466,9 @@ function switchDashboardTab(tabId) {
                      tabId === 'discovery' || tabId === 'howto' || tabId === 'bug' || tabId === 'core';
 
     if (tabId === 'overview') {
+        const timelineContainer = document.getElementById('projects-timeline-container');
+        if(timelineContainer) timelineContainer.style.display = 'block';
+
         const isDetail = document.getElementById('project-detail-area').dataset.active === 'true';
         if (isDetail) {
             document.getElementById('project-detail-area').style.display = 'block';
