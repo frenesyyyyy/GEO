@@ -410,7 +410,6 @@ function openProjectDetail(project, tabId = 'overview') {
     const detailArea = document.getElementById('project-detail-area');
     
     document.getElementById('empty-state').style.display = 'none';
-    document.getElementById('projects-list').style.display = 'none';
     detailArea.style.display = 'block';
     detailArea.dataset.active = 'true';
     
@@ -432,9 +431,11 @@ function closeProjectDetail() {
     detailArea.style.display = 'none';
     detailArea.dataset.active = 'false';
     
-    // Disable other sidebar tabs and show selection hint
-    document.querySelectorAll('.sidebar-nav li').forEach(li => {
-        if (li.id !== 'nav-overview') li.classList.add('disabled');
+    // Disable project-specific tabs but keep Global tools active
+    const projectTabs = ['nav-sources', 'nav-prompts', 'nav-models', 'nav-comply'];
+    projectTabs.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.classList.add('disabled');
     });
     const hint = document.getElementById('nav-selection-hint');
     if (hint) hint.style.display = 'block';
@@ -466,12 +467,15 @@ function switchDashboardTab(tabId) {
     const isGlobal = tabId === 'tokens' || tabId === 'billing' || tabId === 'request' || 
                      tabId === 'discovery' || tabId === 'howto' || tabId === 'bug' || tabId === 'core';
 
-    if (tabId === 'overview') {
+    // Show Timeline for all non-global tabs
+    if (!isGlobal) {
         const timelineContainer = document.getElementById('projects-timeline-container');
         if(timelineContainer) timelineContainer.style.display = 'block';
         const projectList = document.getElementById('projects-list');
         if(projectList) projectList.style.display = 'flex';
+    }
 
+    if (tabId === 'overview') {
         const isDetail = document.getElementById('project-detail-area').dataset.active === 'true';
         if (isDetail) {
             document.getElementById('project-detail-area').style.display = 'block';
@@ -484,7 +488,7 @@ function switchDashboardTab(tabId) {
         const sectionEl = document.getElementById(`global-${tabId}`);
         if(sectionEl) sectionEl.style.display = 'block';
     } else {
-        // Show specific project detail tab
+        // Show specific project detail tab (Sources, Prompts, etc.)
         document.getElementById('project-detail-area').style.display = 'block';
         const sectionEl = document.getElementById(`detail-${tabId}`);
         if(sectionEl) sectionEl.style.display = 'block';
