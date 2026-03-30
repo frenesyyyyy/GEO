@@ -212,6 +212,70 @@
                 </div>
 
                 <!-- Project Detail Area (Initially Hidden) -->
+                <div id="project-detail-area" style="display: none;">
+                    <button class="btn-back" onclick="closeProjectDetail()"><i data-lucide="arrow-left"></i> Back to Projects</button>
+                    
+                    <div class="project-header" style="margin-top: 16px; margin-bottom: 32px;">
+                        <h2 id="detail-project-name" style="margin: 0;">Project Name</h2>
+                        <span id="detail-project-plan" class="badge">Plan</span>
+                    </div>
+
+                    <!-- Detail Tabs Content -->
+                    <div id="detail-overview" class="detail-content-section">
+                        <div class="content-card">
+                            <h3>Project Updates</h3>
+                            <div id="overview-update-box" class="update-box">
+                                <span class="status-light green"></span>
+                                <span id="overview-msg-display" style="font-size: 14px; font-weight: 500;">No recent updates.</span>
+                                <span id="overview-time-display" style="color: #6b7280; font-size: 12px; margin-left: auto;"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="detail-prompts" class="detail-content-section" style="display: none;">
+                        <div class="content-card">
+                            <h3 id="prompts-title-display">No Prompts Documentation</h3>
+                            <p id="prompts-desc-display" style="color: #6b7280;">Code documentation for the website will appear here.</p>
+                            <div id="prompts-files-display" class="files-container" style="margin-top: 24px;"></div>
+                        </div>
+                    </div>
+
+                    <div id="detail-sources" class="detail-content-section premium-dashboard" style="display: none;">
+                        <div class="report-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
+                            <div>
+                                <h3 style="margin:0; font-size:24px;">The Execution Hub</h3>
+                                <p style="color:#6b7280; font-size:14px; margin-top:4px;">Technical SEO and Content Intelligence Live Assessment</p>
+                            </div>
+                            <button id="download-audit-btn" class="btn-primary" style="display:none; background: linear-gradient(135deg, #00f0ff, #0044ff); color: white; border:none; border-radius: 99px; font-weight: 600;">
+                                <i data-lucide="download"></i> Official PDF Report
+                            </button>
+                        </div>
+                        
+                        <div id="sources-content-display">
+                            <!-- Premium circular visuals injected here -->
+                        </div>
+                    </div>
+
+                    <div id="detail-models" class="detail-content-section" style="display: none;">
+                        <div class="content-card">
+                            <h3>Models Documentation</h3>
+                            <p id="models-content-display" class="markdown-preview" style="color: #6b7280;">Complete project documentation will appear here when updated.</p>
+                        </div>
+                    </div>
+                    
+                    <div id="detail-settings" class="detail-content-section" style="display: none;">
+                        <div class="content-card">
+                            <h3>Project Settings</h3>
+                            <p style="color: #6b7280;">Project settings and configuration options.</p>
+                        </div>
+                    </div>
+
+                    <div id="detail-comply" class="detail-content-section" style="display: none;">
+                        <div class="content-card message-card highlight">
+                            <h3>Compliance Status</h3>
+                            <p id="comply-content-display" style="font-weight: 500;">Awaiting compliance review from the Nuclear AI team.</p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Tools & Discovery Global Content Areas -->
