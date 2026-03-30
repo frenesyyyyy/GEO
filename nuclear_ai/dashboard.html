@@ -141,6 +141,31 @@
                     <li class="disabled" id="nav-models" onclick="switchDashboardTab('models')"><a href="#"><i data-lucide="box"></i> Models</a></li>
                     <li class="disabled" id="nav-comply" onclick="switchDashboardTab('comply')"><a href="#"><i data-lucide="shield-check"></i> Comply</a></li>
                 </ul>
+
+                <div class="nav-group" style="margin-top: 32px;">Tools & Discovery</div>
+                <ul>
+                    <li id="nav-tokens" onclick="switchDashboardTab('tokens')">
+                        <a href="#"><img src="token.png" class="nav-icon-png"> My Tokens</a>
+                    </li>
+                    <li id="nav-billing" onclick="switchDashboardTab('billing')">
+                        <a href="#"><i data-lucide="credit-card"></i> Billing</a>
+                    </li>
+                    <li id="nav-request" onclick="switchDashboardTab('request')">
+                        <a href="#"><i data-lucide="plus-circle"></i> Request</a>
+                    </li>
+                    <li id="nav-discovery" onclick="switchDashboardTab('discovery')">
+                        <a href="#"><i data-lucide="globe"></i> Discovery</a>
+                    </li>
+                    <li id="nav-howto" onclick="switchDashboardTab('howto')">
+                        <a href="#"><i data-lucide="book-open"></i> How To</a>
+                    </li>
+                    <li id="nav-bug" onclick="switchDashboardTab('bug')">
+                        <a href="#"><i data-lucide="bug"></i> Report Bug</a>
+                    </li>
+                    <li id="nav-core" onclick="switchDashboardTab('core')">
+                        <a href="#"><i data-lucide="cpu"></i> The Core</a>
+                    </li>
+                </ul>
             </div>
             
             <div class="sidebar-footer">
@@ -187,68 +212,105 @@
                 </div>
 
                 <!-- Project Detail Area (Initially Hidden) -->
-                <div id="project-detail-area" style="display: none;">
-                    <button class="btn-back" onclick="closeProjectDetail()"><i data-lucide="arrow-left"></i> Back to Projects</button>
-                    
-                    <div class="project-header" style="margin-top: 16px; margin-bottom: 32px;">
-                        <h2 id="detail-project-name" style="margin: 0;">Project Name</h2>
-                        <span id="detail-project-plan" class="badge">Plan</span>
-                    </div>
+                </div>
 
-                    <!-- Detail Tabs Content -->
-                    <div id="detail-overview" class="detail-content-section">
-                        <div class="content-card">
-                            <h3>Project Updates</h3>
-                            <div id="overview-update-box" class="update-box">
-                                <span class="status-light green"></span>
-                                <span id="overview-msg-display" style="font-size: 14px; font-weight: 500;">No recent updates.</span>
-                                <span id="overview-time-display" style="color: #6b7280; font-size: 12px; margin-left: auto;"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="detail-prompts" class="detail-content-section" style="display: none;">
-                        <div class="content-card">
-                            <h3 id="prompts-title-display">No Prompts Documentation</h3>
-                            <p id="prompts-desc-display" style="color: #6b7280;">Code documentation for the website will appear here.</p>
-                            <div id="prompts-files-display" class="files-container" style="margin-top: 24px;"></div>
-                        </div>
-                    </div>
-
-                    <div id="detail-sources" class="detail-content-section premium-dashboard" style="display: none;">
-                        <div class="report-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
+                <!-- Tools & Discovery Global Content Areas -->
+                <div id="global-tokens" class="detail-content-section" style="display: none;">
+                    <div class="content-card premium-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px;">
                             <div>
-                                <h3 style="margin:0; font-size:24px;">The Execution Hub</h3>
-                                <p style="color:#6b7280; font-size:14px; margin-top:4px;">Technical SEO and Content Intelligence Live Assessment</p>
+                                <h3 style="margin:0; font-size:24px;">Nuclear AI Tokens</h3>
+                                <p style="color:#6b7280; margin-top:4px;">Manage your strategic compute and engineering credits.</p>
                             </div>
-                            <button id="download-audit-btn" class="btn-primary" style="display:none; background: linear-gradient(135deg, #00f0ff, #0044ff); color: white; border:none; border-radius: 99px; font-weight: 600;">
-                                <i data-lucide="download"></i> Official PDF Report
-                            </button>
+                            <img src="token.png" style="width:64px; filter: drop-shadow(0 0 10px rgba(0,240,255,0.3));">
                         </div>
-                        
-                        <div id="sources-content-display">
-                            <!-- Premium circular visuals injected here -->
+                        <div class="token-stats-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
+                            <div class="stat-item" style="background:#f9fafb; padding:20px; border-radius:16px; border:1px solid #e5e7eb;">
+                                <div style="font-size:12px; font-weight:700; color:#6b7280; text-transform:uppercase;">Balance</div>
+                                <div style="font-size:32px; font-weight:800; color:#111827; margin-top:8px;">2,450 <span style="font-size:14px; font-weight:400;">NUCLEAR</span></div>
+                            </div>
+                            <div class="stat-item" style="background:#f9fafb; padding:20px; border-radius:16px; border:1px solid #e5e7eb;">
+                                <div style="font-size:12px; font-weight:700; color:#6b7280; text-transform:uppercase;">Usage / Mo</div>
+                                <div style="font-size:32px; font-weight:800; color:#0088ff; margin-top:8px;">840</div>
+                            </div>
+                            <button class="btn-primary" style="height:100%; border-radius:16px; background:linear-gradient(135deg, #00f0ff, #0044ff); border:none;">Buy More Tokens</button>
                         </div>
                     </div>
+                </div>
 
-                    <div id="detail-models" class="detail-content-section" style="display: none;">
-                        <div class="content-card">
-                            <h3>Models Documentation</h3>
-                            <p id="models-content-display" class="markdown-preview" style="color: #6b7280;">Complete project documentation will appear here when updated.</p>
+                <div id="global-billing" class="detail-content-section" style="display: none;">
+                    <div class="content-card">
+                        <h3>Subscription & Billing</h3>
+                        <div style="border: 1px solid #e5e7eb; border-radius:16px; padding:24px; margin-top:24px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div style="font-weight:700; font-size:18px;">Plus & Support Plan</div>
+                                    <div style="color:#6b7280; font-size:14px;">Next billing date: April 25, 2026</div>
+                                </div>
+                                <div style="font-size:24px; font-weight:800;">$150.00 / mo</div>
+                            </div>
                         </div>
+                        <button class="btn-primary" style="margin-top:24px; background:#111827;">Manage in Customer Portal</button>
                     </div>
-                    
-                    <div id="detail-settings" class="detail-content-section" style="display: none;">
-                        <div class="content-card">
-                            <h3>Project Settings</h3>
-                            <p style="color: #6b7280;">Project settings and configuration options.</p>
-                        </div>
-                    </div>
+                </div>
 
-                    <div id="detail-comply" class="detail-content-section" style="display: none;">
-                        <div class="content-card message-card highlight">
-                            <h3>Compliance Status</h3>
-                            <p id="comply-content-display" style="font-weight: 500;">Awaiting compliance review from the Nuclear AI team.</p>
+                <div id="global-request" class="detail-content-section" style="display: none;">
+                    <div class="content-card">
+                        <h3>Strategic Feature Request</h3>
+                        <p style="color:#6b7280;">Our engineering team prioritizes requests from Plus and Enterprise partners.</p>
+                        <textarea placeholder="Describe the feature or integration you need..." style="width:100%; height:150px; margin-top:20px; padding:16px; border:1px solid #e5e7eb; border-radius:12px; font-family:inherit;"></textarea>
+                        <button class="btn-primary" style="margin-top:16px;">Submit to Roadmap</button>
+                    </div>
+                </div>
+
+                <div id="global-discovery" class="detail-content-section" style="display: none;">
+                    <div class="content-card">
+                        <h3>Discovery & Updates</h3>
+                        <div id="discovery-feed" style="margin-top:24px; display:grid; gap:20px;">
+                            <div class="blog-card" style="padding:20px; border:1px solid #e5e7eb; border-radius:16px;">
+                                <span class="badge" style="background:#ec48991a; color:#ec4899;">New Feature</span>
+                                <h4 style="margin:12px 0 8px;">LLM Reasoning Audit v2.0</h4>
+                                <p style="font-size:14px; color:#6b7280;">We've improved the way we score "Evidence Depth" for GPT-4 and Claude 3.5 Sonnet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="global-howto" class="detail-content-section" style="display: none;">
+                    <div class="content-card">
+                        <h3>Knowledge Base</h3>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:24px;">
+                            <div class="how-to-item" style="padding:20px; border:1px solid #e5e7eb; border-radius:16px;">
+                                <i data-lucide="play-circle" style="color:#0088ff;"></i>
+                                <h4 style="margin:12px 0 4px;">Quick Start Guide</h4>
+                                <p style="font-size:13px; color:#6b7280;">Learn how to connect your first data source in 5 minutes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="global-bug" class="detail-content-section" style="display: none;">
+                    <div class="content-card">
+                        <h3>Report a Technical Issue</h3>
+                        <div class="input-group" style="margin-top:24px;">
+                            <label>Issue Title</label>
+                            <input type="text" placeholder="e.g. Chart not rendering on iOS">
+                        </div>
+                        <div class="input-group" style="margin-top:16px;">
+                            <label>Detailed Description</label>
+                            <textarea style="width:100%; height:120px; padding:12px; border:1px solid #e5e7eb; border-radius:8px;"></textarea>
+                        </div>
+                        <button class="btn-primary" style="margin-top:16px; background:#ef4444;">Submit Bug Report</button>
+                    </div>
+                </div>
+
+                <div id="global-core" class="detail-content-section" style="display: none;">
+                    <div class="content-card" style="background: radial-gradient(circle at top right, #111827, #1f2937); color: white; border: none;">
+                        <h3 style="color:white;"><i data-lucide="cpu" style="color:#00f0ff;"></i> The Nuclear AI Core</h3>
+                        <p style="opacity:0.8; margin-top:16px; line-height:1.6;">Our proprietary engine uses a multi-agentic framework to simulate LLM search behaviors across Google Gemini, OpenAI Search, and Perplexity concurrently. The Core processes over 40 million tokens daily to provide real-time strategic insights.</p>
+                        <div style="margin-top:32px; padding:20px; background:rgba(255,255,255,0.05); border-radius:16px;">
+                            <div style="font-size:12px; font-weight:700; color:#00f0ff;">System Status</div>
+                            <div style="font-size:24px; font-weight:800; margin-top:4px;">OPTIMIZED <span style="font-size:14px; font-weight:400; opacity:0.6;">(Lat. 14ms)</span></div>
                         </div>
                     </div>
                 </div>

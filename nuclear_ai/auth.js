@@ -454,12 +454,16 @@ function switchDashboardTab(tabId) {
     // Hide ALL possible content sections first
     const sections = [
         'projects-list', 'projects-timeline-container', 'empty-state', 'project-detail-area',
-        'detail-overview', 'detail-prompts', 'detail-sources', 'detail-models', 'detail-settings', 'detail-comply'
+        'detail-overview', 'detail-prompts', 'detail-sources', 'detail-models', 'detail-settings', 'detail-comply',
+        'global-tokens', 'global-billing', 'global-request', 'global-discovery', 'global-howto', 'global-bug', 'global-core'
     ];
     sections.forEach(s => {
         const el = document.getElementById(s);
         if(el) el.style.display = 'none';
     });
+
+    const isGlobal = tabId === 'tokens' || tabId === 'billing' || tabId === 'request' || 
+                     tabId === 'discovery' || tabId === 'howto' || tabId === 'bug' || tabId === 'core';
 
     if (tabId === 'overview') {
         const isDetail = document.getElementById('project-detail-area').dataset.active === 'true';
@@ -467,15 +471,21 @@ function switchDashboardTab(tabId) {
             document.getElementById('project-detail-area').style.display = 'block';
             document.getElementById('detail-overview').style.display = 'block';
         } else {
-            // Re-render project list to show either list or empty state
             renderProjects();
         }
+    } else if (isGlobal) {
+        // Show global tool section
+        const sectionEl = document.getElementById(`global-${tabId}`);
+        if(sectionEl) sectionEl.style.display = 'block';
     } else {
-        // Show specific detail tab
+        // Show specific project detail tab
         document.getElementById('project-detail-area').style.display = 'block';
         const sectionEl = document.getElementById(`detail-${tabId}`);
         if(sectionEl) sectionEl.style.display = 'block';
     }
+    
+    // Always re-run Lucide on tab switch to ensure new icons are rendered
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 async function loadProjectDetailData(projectId) {
