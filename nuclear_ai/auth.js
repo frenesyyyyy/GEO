@@ -133,27 +133,61 @@ async function renderProjects() {
         listContainer.innerHTML = '';
         projects.forEach(p => {
             const node = document.createElement('div');
-            node.className = 'timeline-node';
+            const planKey = (p.plan || '').toLowerCase();
+            node.className = `timeline-node node-${planKey}`;
             
-            // Find latest audit date
-            let lastAuditDate = 'No Audits';
+            // Extract latest audit data
+            let lastAuditDate = 'Queue Pending';
+            let vciScore = 0;
+            let hasAudit = false;
+            
             if(p.sources && p.sources.length > 0) {
                 const sortedAudits = [...p.sources].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-                lastAuditDate = `Last Audit: ${new Date(sortedAudits[0].timestamp).toLocaleDateString()}`;
+                const latest = sortedAudits[0];
+                lastAuditDate = `Last Report: ${new Date(latest.timestamp).toLocaleDateString()}`;
+                hasAudit = true;
+                try {
+                    const aData = JSON.parse(latest.content);
+                    vciScore = parseInt(aData.vci) || 0;
+                } catch(e){}
+            }
+
+            // Metrics Logic
+            let miniMetricHtml = '';
+            if(hasAudit) {
+                let barColor = '#ef4444';
+                if(vciScore > 65) barColor = '#10b981';
+                else if(vciScore >= 35) barColor = '#f59e0b';
+                
+                miniMetricHtml = `
+                    <div class="mini-metric">
+                        <div class="mini-metric-label">
+                            <span>Visibility Health</span>
+                            <span style="color: ${barColor}">${vciScore}%</span>
+                        </div>
+                        <div class="mini-bar-bg">
+                            <div class="mini-bar-fg" style="width: ${vciScore}%; background: ${barColor}"></div>
+                        </div>
+                    </div>
+                `;
             }
 
             // Action button
             const actionBtn = document.createElement('button');
             actionBtn.className = 'timeline-action';
-            actionBtn.innerText = 'Launch Execution Hub';
+            actionBtn.innerHTML = `<i data-lucide="zap"></i> Audit Dashboard`;
             actionBtn.onclick = () => openProjectDetail(p);
 
             node.innerHTML = `
-                <div class="timeline-dot" style="background: ${p.status === 'active' ? '#00f0ff' : '#f59e0b'}; border-color: #fdfdfd;"></div>
+                <div class="timeline-dot"></div>
                 <div class="timeline-card">
-                    <div class="timeline-date">${lastAuditDate}</div>
+                    <span class="timeline-date">${lastAuditDate}</span>
                     <h4 class="timeline-title">${p.name}</h4>
-                    <div class="timeline-plan">${p.plan.toUpperCase()}</div>
+                    <div class="timeline-plan">
+                        <i data-lucide="layers" style="width:12px; height:12px;"></i>
+                        ${p.plan.toUpperCase()}
+                    </div>
+                    ${miniMetricHtml}
                     <div class="action-wrap"></div>
                 </div>
             `;
@@ -712,5 +746,12 @@ function getFileIcon(type) {
         'txt': 'file-text'
     };
     return map[type] || 'file';
+}
+
+function goToLatestProject() {
+    const track = document.getElementById('projects-list');
+    if(track) {
+        track.style.transform = `translateX(0px)`;
+    }
 }
 
