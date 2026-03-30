@@ -124,32 +124,42 @@ async function renderProjects() {
     
     if (projects.length === 0) {
         document.getElementById('empty-state').style.display = 'block';
-        document.getElementById('projects-list').style.display = 'none';
+        document.getElementById('projects-timeline-container').style.display = 'none';
     } else {
         document.getElementById('empty-state').style.display = 'none';
-        document.getElementById('projects-list').style.display = 'grid';
+        document.getElementById('projects-timeline-container').style.display = 'block';
         
         const listContainer = document.getElementById('projects-list');
         listContainer.innerHTML = '';
         projects.forEach(p => {
-            const card = document.createElement('div');
-            card.className = 'project-card';
-            card.onclick = () => openProjectDetail(p);
-            card.innerHTML = `
-                <div class="project-info">
-                    <div class="project-icon"><i data-lucide="layout"></i></div>
-                    <div>
-                        <h4>${p.name}</h4>
-                        <span class="project-tag ${p.status}">${p.status}</span>
-                    </div>
-                </div>
-                <div class="project-meta">
-                    <span>Plan: ${p.plan}</span>
-                    <span>Created: ${new Date(p.created_at).toLocaleDateString()}</span>
+            const node = document.createElement('div');
+            node.className = 'timeline-node';
+            
+            // Re-bind onclick this way to avoid JSON quotes issues
+            const actionBtn = document.createElement('button');
+            actionBtn.className = 'timeline-action';
+            actionBtn.innerText = 'Launch Execution Hub';
+            actionBtn.onclick = () => openProjectDetail(p);
+
+            node.innerHTML = `
+                <div class="timeline-dot" style="border-color: ${p.status === 'active' ? '#00f0ff' : '#f59e0b'}"></div>
+                <div class="timeline-card">
+                    <div class="timeline-date">${new Date(p.created_at).toLocaleString()}</div>
+                    <h4 class="timeline-title">${p.name}</h4>
+                    <div class="timeline-plan">${p.plan.toUpperCase()}</div>
+                    <div class="action-wrap"></div>
                 </div>
             `;
-            listContainer.appendChild(card);
+            node.querySelector('.action-wrap').appendChild(actionBtn);
+            listContainer.appendChild(node);
         });
+        
+        // Simple slider logic
+        let track = document.getElementById('projects-list');
+        let pos = 0;
+        document.getElementById('timeline-next').onclick = () => { pos = Math.max(pos - 280, -(track.scrollWidth - track.clientWidth)); track.style.transform = `translateX(${pos}px)`; };
+        document.getElementById('timeline-prev').onclick = () => { pos = Math.min(pos + 280, 0); track.style.transform = `translateX(${pos}px)`; };
+
         lucide.createIcons();
     }
 }
@@ -402,7 +412,7 @@ function switchDashboardTab(tabId) {
 
     // Hide ALL possible content sections first
     const sections = [
-        'projects-list', 'empty-state', 'project-detail-area',
+        'projects-list', 'projects-timeline-container', 'empty-state', 'project-detail-area',
         'detail-overview', 'detail-prompts', 'detail-sources', 'detail-models', 'detail-settings', 'detail-comply'
     ];
     sections.forEach(s => {
@@ -512,11 +522,135 @@ async function loadProjectDetailData(projectId) {
         });
     }
 
-    // 3. Simple Text Blocks (Sources, Models, Comply)
-    renderSimplePackages('sources', data.sources);
+    // 3. Render Special Sources Block
+    if (data.sources && data.sources.length > 0) {
+        renderPremiumSourcesDashboard(data.sources);
+    } else {
+        document.getElementById('sources-content-display').innerHTML = '<div class="empty-package" style="margin-top:24px;">No Audit data uploaded yet.</div>';
+    }
+
+    // 4. Simple Text Blocks (Models, Comply)
     renderSimplePackages('models', data.models);
     renderSimplePackages('comply', data.comply);
 
+    lucide.createIcons();
+}
+
+function createCircle(val, title) {
+    let color = 'color-green';
+    let tColor = 'text-green';
+    if(val < 35) { color = 'color-red'; tColor = 'text-red'; }
+    else if(val <= 65) { color = 'color-yellow'; tColor = 'text-yellow'; }
+
+    let dashArray = `${(val / 100) * 251.2}, 251.2`; 
+    
+    return `
+    <div class="circ-wrap">
+        <div class="circ-chart">
+            <svg viewBox="0 0 100 100">
+                <circle class="circ-bg" cx="50" cy="50" r="40"></circle>
+                <circle class="circ-fg ${color}" cx="50" cy="50" r="40" stroke-dasharray="0, 251.2" style="stroke-dasharray: ${dashArray};"></circle>
+            </svg>
+            <div class="circ-val ${tColor}">${val}</div>
+        </div>
+        <div class="circ-title">${title}</div>
+    </div>`;
+}
+
+function renderPremiumSourcesDashboard(sourcesArr) {
+    const container = document.getElementById('sources-content-display');
+    const b = document.getElementById('download-audit-btn');
+    
+    // Sort and get latest
+    const sorted = [...sourcesArr].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+    const latest = sorted[0];
+
+    // parse JSON from content
+    let auditData = null;
+    try { auditData = JSON.parse(latest.content); } catch(e) { }
+
+    if(!auditData || typeof auditData !== 'object') {
+        container.innerHTML = '<div class="empty-package">Audit data format error. Needs JSON object.</div>';
+        b.style.display = 'none';
+        return;
+    }
+
+    if(auditData.pdfFile) {
+        b.style.display = 'inline-flex';
+        b.onclick = () => window.open(auditData.pdfFile, '_target');
+    } else {
+        b.style.display = 'none';
+    }
+
+    container.innerHTML = `
+        <div class="audit-grid">
+            <div class="audit-card">
+                <h4><i data-lucide="activity"></i> Visibility Health Matrix</h4>
+                <div class="circ-row">
+                    ${createCircle(auditData.vci || 0, 'Context Index')}
+                    ${createCircle(auditData.ded || 0, 'Evidence Depth')}
+                    ${createCircle(auditData.dcs || 0, 'Data Confidence')}
+                </div>
+                <div style="margin-top:24px;">
+                    <ul class="stats-list">
+                        <li><span>Visibility Risk</span> <span class="stats-val text-red">${auditData.vur || '0'}%</span></li>
+                        <li><span>Classification Mapping</span> <span class="stats-val">${auditData.cmap || 'N/A'}</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="audit-card">
+                <h4><i data-lucide="target"></i> Discovery Hit Rate</h4>
+                <div class="circ-row">
+                    ${createCircle(auditData.dr_blind || 0, 'Blind (T1)')}
+                    ${createCircle(auditData.dr_context || 0, 'Contextual (T2)')}
+                    ${createCircle(auditData.dr_brand || 0, 'Branded (T3)')}
+                </div>
+            </div>
+
+            <div class="audit-card">
+                <h4><i data-lucide="file-check"></i> Content Engineering Analysis</h4>
+                <div class="circ-row">
+                    ${createCircle(auditData.ce_llm || 0, 'LLM Readiness')}
+                    ${createCircle(auditData.ce_answer || 0, 'Answer-First')}
+                    ${createCircle(auditData.ce_density || 0, 'Evidence Density')}
+                    ${createCircle(auditData.ce_chunk || 0, 'Chunkability')}
+                </div>
+            </div>
+
+            <div class="audit-card">
+                <h4><i data-lucide="shield-check"></i> Brand Trust & Source Taxonomy</h4>
+                <div class="circ-row">
+                    ${createCircle(auditData.bt_score || 0, 'Brand Strength')}
+                    ${createCircle(auditData.bt_risk || 0, 'Reputation Risk')}
+                </div>
+                <div style="margin-top:24px;">
+                    <ul class="stats-list">
+                        <li><span>Trust Mix Summary</span> <span class="stats-val">${auditData.bt_mix || 'N/A'}</span></li>
+                        <li><span>Citations</span> <span class="stats-val">${auditData.bt_citations || '0'}</span></li>
+                        <li><span>Est. AI Mentions</span> <span class="stats-val">${auditData.bt_mentions || '0 words'}</span></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="audit-card">
+                <h4><i data-lucide="zap"></i> Agentic Readiness</h4>
+                <div class="circ-row">
+                    ${createCircle(auditData.ar_btn || 0, 'Button Semantics')}
+                    ${createCircle(auditData.ar_form || 0, 'Form Readability')}
+                    ${createCircle(auditData.ar_cta || 0, 'CTA Clarity')}
+                </div>
+            </div>
+
+            <div class="audit-card">
+                <h4><i data-lucide="briefcase"></i> Business Intelligence Profile</h4>
+                <ul class="stats-list" style="margin-top:16px;">
+                    <li><span>Macro Industry</span> <span class="stats-val">${auditData.bi_ind || 'N/A'}</span></li>
+                    <li><span>Geo-Behavior</span> <span class="stats-val">${auditData.bi_geo || 'N/A'}</span></li>
+                </ul>
+            </div>
+        </div>
+    `;
     lucide.createIcons();
 }
 

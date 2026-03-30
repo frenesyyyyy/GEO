@@ -136,8 +136,8 @@
                             Overview <span id="nav-selection-hint" style="font-size: 10px; color: #9ca3af; display: block; font-weight: 400;">(Select a Project)</span>
                         </a>
                     </li>
-                    <li class="disabled" id="nav-prompts" onclick="switchDashboardTab('prompts')"><a href="#"><i data-lucide="terminal-square"></i> Prompts</a></li>
                     <li class="disabled" id="nav-sources" onclick="switchDashboardTab('sources')"><a href="#"><i data-lucide="database"></i> Sources</a></li>
+                    <li class="disabled" id="nav-prompts" onclick="switchDashboardTab('prompts')"><a href="#"><i data-lucide="terminal-square"></i> Prompts</a></li>
                     <li class="disabled" id="nav-models" onclick="switchDashboardTab('models')"><a href="#"><i data-lucide="box"></i> Models</a></li>
                     <li class="disabled" id="nav-comply" onclick="switchDashboardTab('comply')"><a href="#"><i data-lucide="shield-check"></i> Comply</a></li>
                 </ul>
@@ -162,8 +162,20 @@
 
             <!-- Content Area -->
             <div class="dash-main-area">
-                <!-- Projects List (Initially hidden) -->
-                <div id="projects-list" style="display: none;"></div>
+                <!-- Timeline Slider (Replaces Projects Grid) -->
+                <div id="projects-timeline-container" class="timeline-container" style="display: none;">
+                    <div class="timeline-header-top">
+                        <h3 style="margin:0;">Project Timeline <span style="font-size: 14px; font-weight: 400; color: #6b7280; margin-left:12px;">Timeline from Today</span></h3>
+                        <div class="timeline-controls">
+                            <button class="timeline-nav-btn" id="timeline-prev"><i data-lucide="arrow-left"></i></button>
+                            <button class="timeline-nav-btn" id="timeline-next"><i data-lucide="arrow-right"></i></button>
+                        </div>
+                    </div>
+                    <div class="timeline-track-wrapper">
+                        <div class="timeline-line"></div>
+                        <div class="timeline-track" id="projects-list"></div>
+                    </div>
+                </div>
 
                 <!-- Empty State -->
                 <div id="empty-state" class="empty-state">
@@ -202,10 +214,19 @@
                         </div>
                     </div>
 
-                    <div id="detail-sources" class="detail-content-section" style="display: none;">
-                        <div class="content-card">
-                            <h3>Sources Documentation</h3>
-                            <p id="sources-content-display" class="markdown-preview" style="color: #6b7280;">No sources documentation provided yet.</p>
+                    <div id="detail-sources" class="detail-content-section premium-dashboard" style="display: none;">
+                        <div class="report-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
+                            <div>
+                                <h3 style="margin:0; font-size:24px;">The Execution Hub</h3>
+                                <p style="color:#6b7280; font-size:14px; margin-top:4px;">Technical SEO and Content Intelligence Live Assessment</p>
+                            </div>
+                            <button id="download-audit-btn" class="btn-primary" style="display:none; background: linear-gradient(135deg, #00f0ff, #0044ff); color: white; border:none; border-radius: 99px; font-weight: 600;">
+                                <i data-lucide="download"></i> Official PDF Report
+                            </button>
+                        </div>
+                        
+                        <div id="sources-content-display">
+                            <!-- Premium circular visuals injected here -->
                         </div>
                     </div>
 

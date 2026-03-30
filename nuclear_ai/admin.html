@@ -15,6 +15,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="dashboard-body admin-body">
+    <div id="admin-earnings-badge" style="position: absolute; top: 24px; right: 40px; background: #111827; color: #00f0ff; padding: 10px 20px; border-radius: 12px; font-weight: 700; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <i data-lucide="dollar-sign" style="width: 16px; height: 16px; vertical-align: text-bottom;"></i> Estimated Earnings: $<span id="earnings-val">0</span>
+    </div>
     <div class="dashboard-layout">
         <!-- Left Sidebar: Users List -->
         <aside class="dashboard-sidebar" style="border-right: 1px solid #e5e7eb; flex-shrink: 0;">
@@ -58,7 +61,9 @@
                 <div class="dash-filters">
                     <h3 id="editing-project-name" style="margin: 0;">Editing Project</h3>
                 </div>
+                </div>
                 <div style="display: flex; gap: 12px;">
+                    <button class="btn-primary" onclick="deleteProject()" style="background: #ef4444; color: white;"><i data-lucide="trash-2"></i> Delete Project</button>
                     <button class="btn-primary" onclick="saveProjectData()"><i data-lucide="save"></i> Save Changes</button>
                 </div>
             </header>
@@ -67,8 +72,8 @@
                 <!-- Tabs -->
                 <div class="auth-tabs" style="margin-bottom: 32px; display: flex; gap: 8px;">
                     <button class="auth-tab active" onclick="switchAdminTab('overview')">Overview</button>
-                    <button class="auth-tab" onclick="switchAdminTab('prompts')">Prompts</button>
                     <button class="auth-tab" onclick="switchAdminTab('sources')">Sources</button>
+                    <button class="auth-tab" onclick="switchAdminTab('prompts')">Prompts</button>
                     <button class="auth-tab" onclick="switchAdminTab('models')">Models</button>
                     <button class="auth-tab" onclick="switchAdminTab('comply')">Comply</button>
                 </div>
@@ -105,8 +110,8 @@
                                 <label class="form-label" style="margin-top: 16px;">Description</label>
                                 <textarea id="prompts-desc" class="admin-textarea" placeholder="Detailed documentation..."></textarea>
                                 
-                                <label class="form-label" style="margin-top: 16px;">Attach Files (comma separated names)</label>
-                                <input type="text" id="prompts-files" class="admin-input" placeholder="index.js, styles.css, README.md">
+                                <label class="form-label" style="margin-top: 16px;">Attach PDF File</label>
+                                <input type="file" id="prompts-file-upload" class="admin-input" accept=".pdf" style="padding: 9px;">
                             </div>
                             <div class="admin-history-col">
                                 <label class="form-label">Existing Packages</label>
@@ -119,11 +124,60 @@
                     <div id="tab-sources" class="admin-tab-content" style="display: none;">
                         <div class="admin-editor-grid">
                             <div class="admin-form-col">
-                                <label class="form-label">Sources Documentation</label>
-                                <textarea id="sources-content" class="admin-textarea" style="height: 200px;" placeholder="Paste tool documentation here..."></textarea>
+                                <h4 style="margin:0 0 16px 0;">Visibility Health Matrix</h4>
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                                    <div><label class="form-label">Visibility Context Index (0-100)</label><input type="number" id="src-vci" class="admin-input" value="0"></div>
+                                    <div><label class="form-label">Defensible Evidence Depth</label><input type="number" id="src-ded" class="admin-input" value="0"></div>
+                                    <div><label class="form-label">Data Confidence Score</label><input type="number" id="src-dcs" class="admin-input" value="0"></div>
+                                    <div><label class="form-label">Visibility Risk (%)</label><input type="number" id="src-vur" class="admin-input" value="0"></div>
+                                </div>
+                                <div style="margin-top:12px;"><label class="form-label">Classification Mapping</label><input type="text" id="src-cmap" class="admin-input"></div>
+                                
+                                <h4 style="margin:24px 0 16px 0;">Discovery Hit Rate</h4>
+                                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
+                                    <div><label class="form-label">Blind (T1) %</label><input type="number" id="src-dr-blind" class="admin-input" value="0"></div>
+                                    <div><label class="form-label">Contextual (T2) %</label><input type="number" id="src-dr-context" class="admin-input" value="0"></div>
+                                    <div><label class="form-label">Branded (T3) %</label><input type="number" id="src-dr-brand" class="admin-input" value="0"></div>
+                                </div>
+
+                                <h4 style="margin:24px 0 16px 0;">Content Engineering Analysis</h4>
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                                    <div><label class="form-label">LLM Readiness</label><input type="number" id="src-ce-llm" class="admin-input" value="0"></div>
+                                    <div><label class="form-label">Answer-First Score</label><input type="number" id="src-ce-answer" class="admin-input" value="0"></div>
+                                    <div><label class="form-label">Evidence Density</label><input type="number" id="src-ce-density" class="admin-input" value="0"></div>
+                                    <div><label class="form-label">Chunkability</label><input type="number" id="src-ce-chunk" class="admin-input" value="0"></div>
+                                </div>
+
+                                <h4 style="margin:24px 0 16px 0;">Off-site Brand Trust & Source Taxonomy</h4>
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                                    <div><label class="form-label">Brand Strength</label><input type="number" id="src-bt-score" class="admin-input" value="0"></div>
+                                    <div><label class="form-label">Reputation Risk</label><input type="number" id="src-bt-risk" class="admin-input" value="0"></div>
+                                    <div><label class="form-label">Citations Found</label><input type="text" id="src-bt-citations" class="admin-input" placeholder="e.g. Owned (1), Earned (2)"></div>
+                                    <div><label class="form-label">Est. AI Mentions</label><input type="text" id="src-bt-mentions" class="admin-input" placeholder="e.g. ~500 words"></div>
+                                </div>
+                                <div style="margin-top:12px;"><label class="form-label">Trust Mix Summary</label><input type="text" id="src-bt-mix" class="admin-input"></div>
+
+                                <h4 style="margin:24px 0 16px 0;">Agentic Readiness</h4>
+                                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
+                                    <div><label class="form-label">Button Sem.</label><input type="number" id="src-ar-btn" class="admin-input" value="0"></div>
+                                    <div><label class="form-label">Form Read.</label><input type="number" id="src-ar-form" class="admin-input" value="0"></div>
+                                    <div><label class="form-label">CTA Clarity</label><input type="number" id="src-ar-cta" class="admin-input" value="0"></div>
+                                </div>
+
+                                <h4 style="margin:24px 0 16px 0;">Business Intelligence Profile</h4>
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                                    <div><label class="form-label">Macro Industry</label><input type="text" id="src-bi-ind" class="admin-input"></div>
+                                    <div><label class="form-label">Geo-Behavior</label><input type="text" id="src-bi-geo" class="admin-input"></div>
+                                </div>
+
+                                <hr style="margin: 32px 0; border:none; border-top:1px solid #e5e7eb;">
+                                <h4 style="margin:0 0 16px 0;">Official PDF Audit</h4>
+                                <label class="form-label">Upload PDF file for the final audit report</label>
+                                <input type="file" id="src-pdf-upload" class="admin-input" accept=".pdf" style="padding: 9px;">
+                                <p id="src-pdf-status" style="font-size: 13px; color: #6b7280; margin-top: 8px;"></p>
                             </div>
                             <div class="admin-history-col">
-                                <label class="form-label">History</label>
+                                <label class="form-label">Previous Audits</label>
                                 <div id="history-sources" class="history-list"></div>
                             </div>
                         </div>

@@ -1,0 +1,12 @@
+in the pricing page, keep style like this. 
+change only the features unlockable with the products.
+ Geo/seo standard becomes "GEO/SEO Plus" 
+ the geo/seo plus support becomes "GEO/SEO Master" 
+ and the other one stays. 
+ 
+ the features of plus are : General GEO/SEO increase guaranteed, monthly audits (check out more[link]), Final asset product, Monthly meeting, 500 Nuclear Tokens[green]
+ the master : High GEO/SEO visibility increase guaranteed, weekly audits (check out more[link]), Final asset product, Monthly meeting, 1500 Nuclear Tokens[bright gold],
+
+ below all put "learn more about Nuclear Tokens" [link]
+
+ the pricing now is from the 50 to 150 and from 150 to 500 .

@@ -13,7 +13,29 @@ let currentProjectData = null; // Stores all arrays from the active project
 
 window.addEventListener('DOMContentLoaded', () => {
     loadUsers();
+    calcEarnings();
 });
+
+async function calcEarnings() {
+    let total = 0;
+    const planPrices = { 'standard': 50, 'plus': 150, 'mvp': 1000 };
+    if (isMockMode) {
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k.startsWith('projects_')) {
+                const arr = JSON.parse(localStorage.getItem(k) || '[]');
+                arr.forEach(p => total += planPrices[p.plan] || 0);
+            }
+        }
+    } else {
+        const { data, error } = await supabaseClient.from('projects').select('plan');
+        if (!error && data) {
+            data.forEach(p => total += planPrices[p.plan] || 0);
+        }
+    }
+    const badge = document.getElementById('earnings-val');
+    if(badge) badge.innerText = total.toLocaleString();
+}
 
 function loadUsers() {
     const users = JSON.parse(localStorage.getItem('all_auth_users') || '[]');
@@ -181,10 +203,27 @@ function renderTabHistory(tab) {
     lucide.createIcons();
 }
 
+async function uploadFileToSupabase(file, bucket) {
+    if (isMockMode) return file.name; // mock URL
+    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error: uploadError } = await supabaseClient.storage.from(bucket).upload(filePath, file);
+    if (uploadError) {
+        console.error('Upload error', uploadError);
+        return null;
+    }
+    const { data } = supabaseClient.storage.from(bucket).getPublicUrl(filePath);
+    return data.publicUrl;
+}
+
 async function saveProjectData() {
     if (!currentSelectedProjectId || !currentProjectData) return;
     
-    const activeTab = document.querySelector('.auth-tab.active').innerText.toLowerCase();
+    const activeTabObj = document.querySelector('.auth-tab.active');
+    const activeTab = activeTabObj ? activeTabObj.innerText.toLowerCase() : 'overview';
     let newItem = { timestamp: new Date().toISOString() };
 
     if (activeTab === 'overview') {
@@ -197,12 +236,50 @@ async function saveProjectData() {
         if(!title) return alert("Title is required");
         newItem.title = title;
         newItem.desc = document.getElementById('prompts-desc').value;
-        const filesInput = document.getElementById('prompts-files').value;
-        newItem.files = filesInput ? filesInput.split(',').map(s => {
-            const name = s.trim();
-            const ext = name.split('.').pop().toLowerCase();
-            return { name, type: ext };
-        }).filter(f => f.name) : [];
+        
+        const fileInput = document.getElementById('prompts-file-upload');
+        if (fileInput && fileInput.files.length > 0) {
+            document.getElementById('prompts-title').disabled = true;
+            const fileUrl = await uploadFileToSupabase(fileInput.files[0], 'prompts');
+            document.getElementById('prompts-title').disabled = false;
+            newItem.files = [{ name: fileInput.files[0].name, type: 'pdf', url: fileUrl }];
+        } else {
+            newItem.files = [];
+        }
+    } else if (activeTab === 'sources') {
+        let auditData = {
+            vci: document.getElementById('src-vci').value,
+            ded: document.getElementById('src-ded').value,
+            dcs: document.getElementById('src-dcs').value,
+            vur: document.getElementById('src-vur').value,
+            cmap: document.getElementById('src-cmap').value,
+            dr_blind: document.getElementById('src-dr-blind').value,
+            dr_context: document.getElementById('src-dr-context').value,
+            dr_brand: document.getElementById('src-dr-brand').value,
+            ce_llm: document.getElementById('src-ce-llm').value,
+            ce_answer: document.getElementById('src-ce-answer').value,
+            ce_density: document.getElementById('src-ce-density').value,
+            ce_chunk: document.getElementById('src-ce-chunk').value,
+            bt_score: document.getElementById('src-bt-score').value,
+            bt_risk: document.getElementById('src-bt-risk').value,
+            bt_citations: document.getElementById('src-bt-citations').value,
+            bt_mentions: document.getElementById('src-bt-mentions').value,
+            bt_mix: document.getElementById('src-bt-mix').value,
+            ar_btn: document.getElementById('src-ar-btn').value,
+            ar_form: document.getElementById('src-ar-form').value,
+            ar_cta: document.getElementById('src-ar-cta').value,
+            bi_ind: document.getElementById('src-bi-ind').value,
+            bi_geo: document.getElementById('src-bi-geo').value,
+        };
+
+        const fileInput = document.getElementById('src-pdf-upload');
+        if (fileInput && fileInput.files.length > 0) {
+            const fileUrl = await uploadFileToSupabase(fileInput.files[0], 'audits');
+            auditData.pdfFile = fileUrl;
+        }
+
+        newItem.content = JSON.stringify(auditData);
+
     } else {
         const content = document.getElementById(`${activeTab}-content`).value;
         if(!content) return alert("Content is required");
@@ -230,6 +307,31 @@ async function saveProjectData() {
             loadProjectData(currentSelectedProjectId);
         }
     }
+}
+
+async function deleteProject() {
+    if (!currentSelectedProjectId) return;
+    if (!confirm("Are you sure you want to permanently delete this project?")) return;
+
+    if (isMockMode) {
+        const projectsKey = `projects_${currentSelectedEmail}`;
+        let projects = JSON.parse(localStorage.getItem(projectsKey) || '[]');
+        projects = projects.filter(p => p.id !== currentSelectedProjectId);
+        localStorage.setItem(projectsKey, JSON.stringify(projects));
+        localStorage.removeItem(`project_data_${currentSelectedProjectId}`);
+    } else {
+        const { error } = await supabaseClient.from('projects').delete().eq('id', currentSelectedProjectId);
+        if (error) {
+            alert("Error deleting project.");
+            return;
+        }
+    }
+
+    currentSelectedProjectId = null;
+    document.getElementById('admin-empty-area').style.display = 'flex';
+    document.getElementById('admin-editor-area').style.display = 'none';
+    loadUserProjects(currentSelectedEmail);
+    calcEarnings();
 }
 
 async function deleteEntry(tab, timestamp) {
