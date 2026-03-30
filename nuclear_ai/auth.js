@@ -176,7 +176,7 @@ async function renderProjects() {
             const actionBtn = document.createElement('button');
             actionBtn.className = 'timeline-action';
             actionBtn.innerHTML = `<i data-lucide="zap"></i> Audit Dashboard`;
-            actionBtn.onclick = () => openProjectDetail(p);
+            actionBtn.onclick = () => openProjectDetail(p, 'sources');
 
             node.innerHTML = `
                 <div class="timeline-dot"></div>
@@ -405,7 +405,7 @@ function handleModalSelect(planId) {
 // Project Detail View Management
 let currentOpenProject = null;
 
-function openProjectDetail(project) {
+function openProjectDetail(project, tabId = 'overview') {
     currentOpenProject = project;
     const detailArea = document.getElementById('project-detail-area');
     
@@ -423,7 +423,7 @@ function openProjectDetail(project) {
     if (hint) hint.style.display = 'none';
 
     loadProjectDetailData(project.id);
-    switchDashboardTab('overview');
+    switchDashboardTab(tabId);
 }
 
 function closeProjectDetail() {
