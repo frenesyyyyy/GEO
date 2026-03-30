@@ -215,7 +215,10 @@ function renderTabHistory(tab) {
 }
 
 async function uploadFileToSupabase(file, bucket) {
-    if (isMockMode) return file.name; // mock URL
+    if (isMockMode) {
+        // Return a valid dummy PDF for local testing
+        return 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
+    }
     
     const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random()}.${fileExt}`;

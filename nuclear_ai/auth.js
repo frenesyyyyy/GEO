@@ -135,16 +135,23 @@ async function renderProjects() {
             const node = document.createElement('div');
             node.className = 'timeline-node';
             
-            // Re-bind onclick this way to avoid JSON quotes issues
+            // Find latest audit date
+            let lastAuditDate = 'No Audits';
+            if(p.sources && p.sources.length > 0) {
+                const sortedAudits = [...p.sources].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+                lastAuditDate = `Last Audit: ${new Date(sortedAudits[0].timestamp).toLocaleDateString()}`;
+            }
+
+            // Action button
             const actionBtn = document.createElement('button');
             actionBtn.className = 'timeline-action';
             actionBtn.innerText = 'Launch Execution Hub';
             actionBtn.onclick = () => openProjectDetail(p);
 
             node.innerHTML = `
-                <div class="timeline-dot" style="border-color: ${p.status === 'active' ? '#00f0ff' : '#f59e0b'}"></div>
+                <div class="timeline-dot" style="background: ${p.status === 'active' ? '#00f0ff' : '#f59e0b'}; border-color: #fdfdfd;"></div>
                 <div class="timeline-card">
-                    <div class="timeline-date">${new Date(p.created_at).toLocaleString()}</div>
+                    <div class="timeline-date">${lastAuditDate}</div>
                     <h4 class="timeline-title">${p.name}</h4>
                     <div class="timeline-plan">${p.plan.toUpperCase()}</div>
                     <div class="action-wrap"></div>
@@ -505,7 +512,10 @@ async function loadProjectDetailData(projectId) {
                 filesHtml = '<div class="package-files">';
                 pkg.files.forEach(f => {
                     const icon = getFileIcon(f.type);
-                    filesHtml += `<div class="file-badge"><i data-lucide="${icon}"></i> ${f.name}</div>`;
+                    const fileUrl = f.url || '#';
+                    filesHtml += `<div class="file-badge" onclick="window.open('${fileUrl}', '_blank')" style="cursor:pointer; border: 1px solid #e5e7eb;">
+                        <i data-lucide="${icon}"></i> ${f.name}
+                    </div>`;
                 });
                 filesHtml += '</div>';
             }
@@ -642,12 +652,23 @@ function renderPremiumSourcesDashboard(sourcesArr) {
                 </div>
             </div>
 
-            <div class="audit-card">
-                <h4><i data-lucide="briefcase"></i> Business Intelligence Profile</h4>
-                <ul class="stats-list" style="margin-top:16px;">
-                    <li><span>Macro Industry</span> <span class="stats-val">${auditData.bi_ind || 'N/A'}</span></li>
-                    <li><span>Geo-Behavior</span> <span class="stats-val">${auditData.bi_geo || 'N/A'}</span></li>
-                </ul>
+            <div class="audit-card" style="grid-column: span 2;">
+                <h4><i data-lucide="history"></i> Full Report History</h4>
+                <div class="stats-list" style="max-height: 200px; overflow-y: auto;">
+                    ${sorted.map(a => {
+                        let aData = {}; try { aData = JSON.parse(a.content); } catch(e){}
+                        return `
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid #f3f4f6;">
+                            <div>
+                                <div style="font-weight:600; font-size:14px;">Audit Report - ${new Date(a.timestamp).toLocaleDateString()}</div>
+                                <div style="font-size:12px; color:#6b7280;">Visibility Index: ${aData.vci || 0}% | Risk: ${aData.vur || 0}%</div>
+                            </div>
+                            <button class="file-badge" onclick="window.open('${aData.pdfFile || '#'}', '_blank')" style="cursor:pointer;">
+                                <i data-lucide="download"></i> Download PDF
+                            </button>
+                        </div>`;
+                    }).join('')}
+                </div>
             </div>
         </div>
     `;
