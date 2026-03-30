@@ -63,6 +63,13 @@
             "Nuclear AI helped me increasing viibility!",
             "expert lawyer for divorce in Hamburg",
             "I have 200$ to invest in crypto, what cryptowallet do you suggest"
+        ],
+
+        // Asteroid orbiting balls
+        asteroids: [
+            { color: 0x0088ff, speed: 1.2, radius: 2.8, offset: 0, inclination: 0.5 },    // Blue
+            { color: 0x10b981, speed: 0.9, radius: 3.1, offset: 2, inclination: -0.8 },  // Green
+            { color: 0xef4444, speed: 1.5, radius: 2.6, offset: 4, inclination: 1.2 }    // Red
         ]
     };
 
@@ -125,6 +132,27 @@
     /* Initial tilt for a nice angle */
     globeGroup.rotation.x = 0.25;
     globeGroup.rotation.z = -0.1;
+
+    /* --------------------------------------------------
+     *  4c. ASTEROIDS — Rolling balls
+     * -------------------------------------------------- */
+    const asteroids = [];
+    CONFIG.asteroids.forEach(cfg => {
+        const geo = new THREE.SphereGeometry(0.06, 12, 12);
+        const mat = new THREE.MeshStandardMaterial({
+            color: cfg.color,
+            emissive: cfg.color,
+            emissiveIntensity: 0.5,
+            flatShading: true
+        });
+        const mesh = new THREE.Mesh(geo, mat);
+        scene.add(mesh); // Add to scene so they don't rotate with globeGroup
+        asteroids.push({
+            mesh: mesh,
+            cfg: cfg,
+            angle: cfg.offset
+        });
+    });
 
     /* --------------------------------------------------
      *  5. LOCATION PIN SYSTEM — red map-marker style
@@ -367,6 +395,18 @@
         
         globeGroup.rotation.y += CONFIG.rotationSpeedY;
         updatePins(delta);
+
+        // Update Asteroids Position
+        const time = clock.getElapsedTime();
+        asteroids.forEach(a => {
+            const cfg = a.cfg;
+            const angle = time * cfg.speed + cfg.offset;
+            
+            // Spherical to Cartesian with inclination
+            a.mesh.position.x = Math.cos(angle) * cfg.radius;
+            a.mesh.position.y = Math.sin(angle) * Math.sin(cfg.inclination) * cfg.radius;
+            a.mesh.position.z = Math.sin(angle) * Math.cos(cfg.inclination) * cfg.radius;
+        });
 
         labelTimer += delta * 1000;
         if (labelsVisible && labelTimer >= CONFIG.messageCycleTime) {
