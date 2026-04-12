@@ -474,7 +474,7 @@ nav ul li a:hover {
 
 /* Showcase Section */
 .showcase-section {
-  padding: 100px 80px 140px;
+  padding: 80px;
   max-width: 1440px;
   margin: 0 auto;
 }
@@ -497,7 +497,7 @@ nav ul li a:hover {
   grid-template-columns: var(--c1) var(--c2) var(--c3);
   grid-template-rows: var(--r1) var(--r2);
   gap: 24px;
-  max-width: 880px;
+  max-width: 960px;
   margin: 0;
   flex-shrink: 0;
   aspect-ratio: 1 / 1;
