@@ -62,9 +62,9 @@ body.dashboard-active {
 }
 
 .auth-header img {
-    width: 64px;
-    height: 64px;
-    margin-bottom: 16px;
+    width: 192px;
+    height: 192px;
+    margin-bottom: 24px;
     object-fit: contain;
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -205,11 +205,11 @@ body.dashboard-active {
 }
 
 .sidebar-header img {
-    width: 48px !important;
-    height: 48px !important;
+    width: 144px !important;
+    height: 144px !important;
     background: #111827;
-    border-radius: 8px;
-    padding: 6px;
+    border-radius: 16px;
+    padding: 12px;
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
