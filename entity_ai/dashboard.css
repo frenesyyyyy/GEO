@@ -62,10 +62,15 @@ body.dashboard-active {
 }
 
 .auth-header img {
-    width: 48px;
-    height: 48px;
+    width: 64px;
+    height: 64px;
     margin-bottom: 16px;
     object-fit: contain;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.auth-header img:hover {
+    transform: scale(1.15);
 }
 
 .auth-header h2 {
@@ -200,9 +205,16 @@ body.dashboard-active {
 }
 
 .sidebar-header img {
+    width: 48px !important;
+    height: 48px !important;
     background: #111827;
     border-radius: 8px;
-    padding: 4px;
+    padding: 6px;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.sidebar-header img:hover {
+    transform: scale(1.15);
 }
 
 .sidebar-title {

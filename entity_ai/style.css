@@ -123,10 +123,15 @@ header {
 }
 
 .logo-img {
-  width: 32px;
-  height: 32px;
+  width: 52px;
+  height: 52px;
   object-fit: contain;
-  border-radius: 6px;
+  border-radius: 8px;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.logo-img:hover {
+  transform: scale(1.15);
 }
 
 nav ul {
