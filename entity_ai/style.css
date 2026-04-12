@@ -474,16 +474,16 @@ nav ul li a:hover {
 
 /* Showcase Section */
 .showcase-section {
-  padding: 80px;
-  max-width: 1440px;
+  padding: 80px 40px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
 .showcase-flex {
   display: flex;
   align-items: center;
-  gap: 100px;
-  justify-content: space-between;
+  gap: 80px;
+  justify-content: flex-start;
 }
 
 .showcase-container {
@@ -497,9 +497,10 @@ nav ul li a:hover {
   grid-template-columns: var(--c1) var(--c2) var(--c3);
   grid-template-rows: var(--r1) var(--r2);
   gap: 24px;
-  max-width: 960px;
+  width: 100%;
+  max-width: 1050px;
   margin: 0;
-  flex-shrink: 0;
+  flex: 1.4;
   aspect-ratio: 1 / 1;
   transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -598,7 +599,7 @@ nav ul li a:hover {
 /* Showcase Content (Right Side) */
 .showcase-content {
   flex: 1;
-  max-width: 600px;
+  max-width: 500px;
 }
 
 .content-eyebrow {
