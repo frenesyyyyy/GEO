@@ -1,6 +1,6 @@
 /**
  * ============================================================
- *  globe.js — Low-Poly 3D Globe Background for Nuclear AI
+ *  globe.js — Low-Poly 3D Globe Background for Entity AI
  * ============================================================
  *
  *  Features:
@@ -60,7 +60,7 @@
             "What's the difference between GEO and SEO",
             "How to get my business on top of AI search?",
             "How to get my business on top of Google?",
-            "Nuclear AI helped me increasing viibility!",
+            "Entity AI helped me increasing visibility!",
             "expert lawyer for divorce in Hamburg",
             "I have 200$ to invest in crypto, what cryptowallet do you suggest"
         ],
