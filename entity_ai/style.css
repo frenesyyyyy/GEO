@@ -474,7 +474,7 @@ nav ul li a:hover {
 
 /* Showcase Section */
 .showcase-section {
-  padding: 80px 80px 120px;
+  padding: 80px 20px 120px;
   max-width: 1440px;
   margin: 0 auto;
 }
@@ -491,7 +491,7 @@ nav ul li a:hover {
   grid-template-rows: var(--r1) var(--r2);
   gap: 24px;
   max-width: 880px;
-  margin: 0;
+  margin: 0 0 0 -50px;
   aspect-ratio: 1 / 1;
   transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -502,11 +502,11 @@ nav ul li a:hover {
 .box-3 { grid-column: 1 / 2; grid-row: 2 / 3; }
 .box-4 { grid-column: 2 / 4; grid-row: 2 / 3; }
 
-/* Interactive Elastic resizing using :has (Reduced intensity) */
-.showcase-container:has(.box-1:hover) { --c1: 1.3fr; --c2: 0.1fr; --c3: 0.6fr; --r1: 1.3fr; --r2: 0.7fr; }
-.showcase-container:has(.box-2:hover) { --c1: 0.6fr; --c2: 0.1fr; --c3: 1.3fr; --r1: 1.3fr; --r2: 0.7fr; }
-.showcase-container:has(.box-3:hover) { --c1: 1.3fr; --c2: 0.1fr; --c3: 0.6fr; --r1: 0.7fr; --r2: 1.3fr; }
-.showcase-container:has(.box-4:hover) { --c1: 0.6fr; --c2: 0.1fr; --c3: 1.3fr; --r1: 0.7fr; --r2: 1.3fr; }
+/* Interactive Elastic resizing using :has (Way less intensity) */
+.showcase-container:has(.box-1:hover) { --c1: 1.15fr; --c2: 0.1fr; --c3: 0.95fr; --r1: 1.1fr; --r2: 0.9fr; }
+.showcase-container:has(.box-2:hover) { --c1: 0.95fr; --c2: 0.1fr; --c3: 1.15fr; --r1: 1.1fr; --r2: 0.9fr; }
+.showcase-container:has(.box-3:hover) { --c1: 1.15fr; --c2: 0.1fr; --c3: 0.95fr; --r1: 0.9fr; --r2: 1.1fr; }
+.showcase-container:has(.box-4:hover) { --c1: 0.95fr; --c2: 0.1fr; --c3: 1.15fr; --r1: 0.9fr; --r2: 1.1fr; }
 
 .showcase-box {
   background: var(--glass-bg);
@@ -553,7 +553,7 @@ nav ul li a:hover {
 .showcase-box:hover {
   border-color: var(--accent-color);
   background: rgba(0, 240, 255, 0.05);
-  transform: scale(1.01);
+  transform: scale(1.005);
   z-index: 10;
 }
 
