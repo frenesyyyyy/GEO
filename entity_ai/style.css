@@ -680,11 +680,6 @@ nav ul li a:hover {
 }
 
 @keyframes neon-electric {
-  color: var(--accent-color);
-  filter: drop-shadow(0 0 10px var(--accent-color));
-}
-
-@keyframes neon-electric {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
