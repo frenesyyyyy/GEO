@@ -498,9 +498,9 @@ nav ul li a:hover {
   grid-template-rows: var(--r1) var(--r2);
   gap: 24px;
   width: 100%;
-  max-width: 1050px;
+  max-width: 525px;
   margin: 0;
-  flex: 1.4;
+  flex: 0.8;
   aspect-ratio: 1 / 1;
   transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
